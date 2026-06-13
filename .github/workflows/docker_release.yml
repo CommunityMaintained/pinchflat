@@ -42,7 +42,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            docker.io/keglin/pinchflat
+            docker.io/communitymaintained/pinchflat
             ghcr.io/${{ github.repository }}
           # All non-release actions will be tagged as `dev` (ie: push, workflow_dispatch)
           tags: |
