@@ -1,5 +1,5 @@
-> [!NOTE]
-> This is a community-maintained fork of [kieraneglin/pinchflat](https://github.com/kieraneglin/pinchflat). The original project is no longer actively maintained; this fork exists to continue development and apply community contributions. Docker images are published to `ghcr.io/communitymaintained/pinchflat`.
+> [!WARNING]
+> This is a community-maintained fork of [kieraneglin/pinchflat](https://github.com/kieraneglin/pinchflat). The original project is no longer actively maintained; this fork exists to continue development and apply community contributions. Docker images are published to `ghcr.io/communitymaintained/pinchflat`. PR welcome - see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 > [!IMPORTANT]  
 > (2025-02-14) [zakkarry](https://github.com/sponsors/zakkarry), who is a collaborator on [cross-seed](https://github.com/cross-seed/cross-seed) and an extremely helpful community member in general, is facing hard times due to medical debt and family illness. If you're able, please consider [sponsoring him on GitHub](https://github.com/sponsors/zakkarry) or donating via [buymeacoffee](https://tip.ary.dev). Tell him I sent you!
