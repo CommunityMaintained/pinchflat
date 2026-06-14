@@ -25,7 +25,7 @@ Open an issue. Check for duplicates first. For bugs, include your Docker version
 
 ### Development setup
 
-See the [Development and Contributing wiki page](https://github.com/CommunityMaintained/pinchflat/wiki/Development-and-Contributing) for local setup instructions.
+TBA
 
 ## Release process
 
