@@ -3,7 +3,7 @@ name: Feature request
 about: Suggest an idea for this project
 title: '[FR] <your title here>'
 labels: feature request
-assignees: kieraneglin
+assignees: CommunityMaintained
 ---
 
 **Is your feature request related to a problem? Please describe.**

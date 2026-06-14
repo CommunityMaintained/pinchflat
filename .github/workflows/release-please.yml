@@ -64,7 +64,7 @@ jobs:
           manifest-file: .release-please-manifest.json
 
   # After a release is published: update mix.exs to "semver (calver)" so the
-  # running app displays both (e.g. "1.0.0 (2026-06-14)").
+  # running app displays both (e.g. "1.0.0 (2026.06.14)").
   # Mix will warn that this isn't strict semver, which is fine for a Docker app.
   update-mix-version:
     name: Update mix.exs version string
