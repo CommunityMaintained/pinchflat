@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Pull prebuilt images
         run: docker compose pull
@@ -75,7 +75,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout master
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: master
           ssh-key: ${{ secrets.RELEASE_DEPLOY_KEY }}
@@ -109,7 +109,7 @@ jobs:
       release_arch: 'linux/amd64,linux/arm64'
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Strip v prefix from release tag
         id: version
