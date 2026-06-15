@@ -1,18 +1,18 @@
 > [!WARNING]
-> This is a community-maintained fork of [kieraneglin/pinchflat](https://github.com/kieraneglin/pinchflat). The original project is no longer actively maintained; this fork exists to continue development and apply community contributions. Docker images are published to `ghcr.io/communitymaintained/pinchflat`. PR welcome - see [CONTRIBUTING.md](CONTRIBUTING.md).
+> This is a community-maintained fork of [kieraneglin/pinchflat](https://github.com/kieraneglin/pinchflat). The original project is not actively maintained; this fork exists to continue development and apply community contributions. Docker images are published to `ghcr.io/communitymaintained/pinchflat`. See [Migrating from kieraneglin/pinchflat](#migrating-from-kieraneglinpinchflat). PR welcome - see [CONTRIBUTING.md](CONTRIBUTING.md).
 
-> [!IMPORTANT]  
+> [!IMPORTANT]
 > (2025-02-14) [zakkarry](https://github.com/sponsors/zakkarry), who is a collaborator on [cross-seed](https://github.com/cross-seed/cross-seed) and an extremely helpful community member in general, is facing hard times due to medical debt and family illness. If you're able, please consider [sponsoring him on GitHub](https://github.com/sponsors/zakkarry) or donating via [buymeacoffee](https://tip.ary.dev). Tell him I sent you!
 
-<p align="center">  
-  <img 
-    src="priv/static/images/originals/logo-white-wordmark-with-background.png" 
+<p align="center">
+  <img
+    src="priv/static/images/originals/logo-white-wordmark-with-background.png"
     alt="Pinchflat Logo by @hernandito"
-    width="700" 
+    width="700"
   />
 </p>
 
-<p align="center">  
+<p align="center">
   <sup>
     <em>logo by <a href="https://github.com/hernandito" target="_blank">@hernandito</a></em>
   </sup>
@@ -32,21 +32,24 @@
 
 ## Table of contents:
 
-- [What it does](#what-it-does)
-- [Features](#features)
-- [Screenshots](#screenshots)
-- [Installation](#installation)
-  - [Unraid](#unraid)
-  - [Portainer](#portainer)
-  - [Docker](#docker)
-  - [Environment Variables](#environment-variables)
-  - [A note on reverse proxies](#reverse-proxies)
-- [Username and Password (authentication)](https://github.com/CommunityMaintained/pinchflat/wiki/Username-and-Password)
-- [Frequently asked questions](https://github.com/CommunityMaintained/pinchflat/wiki/Frequently-Asked-Questions)
-- [Documentation](https://github.com/CommunityMaintained/pinchflat/wiki)
-- [EFF donations](#eff-donations)
-- [Pre-release disclaimer](#pre-release-disclaimer)
-- [Development and Contributing](https://github.com/CommunityMaintained/pinchflat/wiki/Development-and-Contributing)
+- [Your next YouTube media manager](#your-next-youtube-media-manager)
+  - [Table of contents:](#table-of-contents)
+  - [What it does](#what-it-does)
+  - [Features](#features)
+  - [Screenshots](#screenshots)
+  - [Installation](#installation)
+    - [Unraid](#unraid)
+    - [Portainer](#portainer)
+    - [Docker](#docker)
+    - [Podman](#podman)
+    - [IMPORTANT: File permissions](#important-file-permissions)
+    - [ADVANCED: Storing Pinchflat config directory on a network share](#advanced-storing-pinchflat-config-directory-on-a-network-share)
+    - [Environment variables](#environment-variables)
+    - [Reverse Proxies](#reverse-proxies)
+  - [Migrating from kieraneglin/pinchflat](#migrating-from-kieraneglinpinchflat)
+  - [EFF donations](#eff-donations)
+  - [Stability disclaimer](#stability-disclaimer)
+  - [License](#license)
 
 ## What it does
 
@@ -91,7 +94,7 @@ Simply search for Pinchflat in the Community Apps store!
 
 ### Portainer
 
-> [!IMPORTANT]  
+> [!IMPORTANT]
 > See the note below about storing config on a network file share. It's preferred to store the config on a local disk if at all possible.
 
 Docker Compose file:
@@ -185,6 +188,20 @@ If you change this setting and it works well for you, please open an issue or le
 ### Reverse Proxies
 
 Pinchflat makes heavy use of websockets for real-time updates. If you're running Pinchflat behind a reverse proxy then you'll need to make sure it's configured to support websockets.
+
+## Migrating from kieraneglin/pinchflat
+
+The data format is identical — no database changes are needed. Just update the image reference in your Docker run command or compose file:
+
+```text
+ghcr.io/kieraneglin/pinchflat:latest  →  ghcr.io/communitymaintained/pinchflat:latest
+```
+
+Also available on Docker Hub as `communitymaintained/pinchflat:latest`.
+
+Stop the old container, update the image reference, and start it again. Your `/config` and `/downloads` volumes carry over unchanged.
+
+---
 
 ## EFF donations
 
