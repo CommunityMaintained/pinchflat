@@ -10,13 +10,24 @@ jobs:
     name: Lint and Test
     runs-on: ubuntu-latest
     if: "! contains(toJSON(github.event.commits.*.message), '[skip ci]')"
+    permissions:
+      contents: read
+      packages: read
     env:
       COMPOSE_FILE: ./docker-compose.ci.yml
       MIX_ENV: test
+      CI_BASE_IMAGE: ghcr.io/communitymaintained/pinchflat-ci-base:latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Pull prebuilt images
         run: docker compose pull
@@ -30,6 +41,7 @@ jobs:
           context: .
           file: ./docker/dev.Dockerfile
           load: true
+          build-args: BASE_IMAGE=${{ env.CI_BASE_IMAGE }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
