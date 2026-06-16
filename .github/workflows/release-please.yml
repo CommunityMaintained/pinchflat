@@ -4,6 +4,11 @@ on:
   push:
     branches: ['master']
 
+env:
+  # TODO: pin to a smoke-tested :sha-<short> tag once ci-base.yml has produced one.
+  # :latest floats and is fine for bootstrapping; bump via PR for reproducibility.
+  CI_BASE_IMAGE: ghcr.io/communitymaintained/pinchflat-ci-base:latest
+
 jobs:
   test:
     name: Lint and Test
@@ -14,7 +19,6 @@ jobs:
     env:
       COMPOSE_FILE: ./docker-compose.ci.yml
       MIX_ENV: test
-      CI_BASE_IMAGE: ghcr.io/communitymaintained/pinchflat-ci-base:latest
 
     steps:
       - name: Checkout code
@@ -131,5 +135,6 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: CI_BASE_IMAGE=${{ env.CI_BASE_IMAGE }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

@@ -1,42 +1,14 @@
-# Find eligible builder and runner images on Docker Hub. We use Ubuntu/Debian
-# instead of Alpine to avoid DNS resolution issues in production.
-ARG ELIXIR_VERSION=1.18.4
-ARG OTP_VERSION=27.2.4
+# Builder stage runs on the shared ci-base image — it already provides Elixir, OTP,
+# build-essential, git, curl, node+yarn, hex, rebar, and the pinned ffmpeg binary.
+# Runner stage stays on debian:trixie-slim to keep the production image small.
 ARG DEBIAN_VERSION=trixie-20260610-slim
-
-ARG BUILDER_IMAGE="hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}"
+ARG CI_BASE_IMAGE="ghcr.io/communitymaintained/pinchflat-ci-base:latest"
 ARG RUNNER_IMAGE="debian:${DEBIAN_VERSION}"
 
-FROM ${BUILDER_IMAGE} AS builder
+FROM ${CI_BASE_IMAGE} AS builder
 
 ARG TARGETPLATFORM
 RUN echo "Building for ${TARGETPLATFORM:?}"
-
-# install build dependencies
-RUN apt-get update -y && \
-    # System packages
-    apt-get install -y \
-      build-essential \
-      git \
-      curl && \
-    # Node.js and Yarn
-    curl -sL https://deb.nodesource.com/setup_20.x -o nodesource_setup.sh && \
-    bash nodesource_setup.sh && \
-    apt-get install -y nodejs && \
-    npm install -g yarn && \
-    # Hex and Rebar
-    mix local.hex --force && \
-    mix local.rebar --force && \
-    # FFmpeg (latest build that doesn't cause an illegal instruction error for some users - see #347)
-    export FFMPEG_DOWNLOAD=$(case ${TARGETPLATFORM:-linux/amd64} in \
-    "linux/amd64")   echo "https://github.com/yt-dlp/FFmpeg-Builds/releases/download/autobuild-2024-07-30-14-10/ffmpeg-N-116468-g0e09f6d690-linux64-gpl.tar.xz"   ;; \
-    "linux/arm64")   echo "https://github.com/yt-dlp/FFmpeg-Builds/releases/download/autobuild-2024-07-30-14-10/ffmpeg-N-116468-g0e09f6d690-linuxarm64-gpl.tar.xz" ;; \
-    *)               echo ""        ;; esac) && \
-    curl -L ${FFMPEG_DOWNLOAD} --output /tmp/ffmpeg.tar.xz && \
-    tar -xf /tmp/ffmpeg.tar.xz --strip-components=2 --no-anchored -C /usr/local/bin/ ffmpeg ffprobe && \
-    # Cleanup
-    apt-get clean && \
-    rm -f /var/lib/apt/lists/*_*
 
 # prepare build dir
 WORKDIR /app
@@ -75,8 +47,10 @@ FROM ${RUNNER_IMAGE}
 ARG TARGETPLATFORM
 ARG PORT=8945
 
-COPY --from=builder ./usr/local/bin/ffmpeg /usr/bin/ffmpeg
-COPY --from=builder ./usr/local/bin/ffprobe /usr/bin/ffprobe
+# ffmpeg comes from ci-base (pinned there, see issue #347). Bumping it requires
+# rebuilding ci-base and bumping the consumer pin — drift is intentional.
+COPY --from=builder /usr/bin/ffmpeg /usr/bin/ffmpeg
+COPY --from=builder /usr/bin/ffprobe /usr/bin/ffprobe
 
 RUN apt-get update -y && \
     # System packages
