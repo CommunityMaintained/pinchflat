@@ -1,33 +1,32 @@
 ARG ELIXIR_VERSION=1.18.4
 ARG OTP_VERSION=27.2.4
-ARG DEBIAN_VERSION=bookworm-20250428-slim
+ARG DEBIAN_VERSION=trixie-20260610-slim
 
 ARG DEV_IMAGE="hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}"
 
 FROM ${DEV_IMAGE}
 
 ARG TARGETPLATFORM
-RUN echo "Building for ${TARGETPLATFORM:?}"
 
+RUN echo "Building for ${TARGETPLATFORM:?}" && \
 # Install debian packages
-RUN apt-get update -qq && \
+  apt-get update -qq && \
   apt-get install -y inotify-tools curl git openssh-client jq \
     python3 python3-setuptools python3-wheel python3-dev pipx \
-    python3-mutagen locales procps build-essential graphviz zsh unzip
-
+    python3-mutagen locales procps build-essential graphviz zsh unzip && \
 # Install ffmpeg
-RUN export FFMPEG_DOWNLOAD=$(case ${TARGETPLATFORM:-linux/amd64} in \
+  export FFMPEG_DOWNLOAD=$(case ${TARGETPLATFORM:-linux/amd64} in \
     "linux/amd64")   echo "https://github.com/yt-dlp/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz"   ;; \
     "linux/arm64")   echo "https://github.com/yt-dlp/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linuxarm64-gpl.tar.xz" ;; \
     *)               echo ""        ;; esac) && \
     curl -L ${FFMPEG_DOWNLOAD} --output /tmp/ffmpeg.tar.xz && \
-    tar -xf /tmp/ffmpeg.tar.xz --strip-components=2 --no-anchored -C /usr/bin/ "ffmpeg" && \
-    tar -xf /tmp/ffmpeg.tar.xz --strip-components=2 --no-anchored -C /usr/bin/ "ffprobe"
-
+    tar -xf /tmp/ffmpeg.tar.xz --strip-components=2 --no-anchored -C /usr/bin/ ffmpeg ffprobe && \
 # Install nodejs, Yarn, Deno, yt-dlp, and Apprise
-RUN curl -sL https://deb.nodesource.com/setup_20.x -o nodesource_setup.sh && \
+  curl -sL https://deb.nodesource.com/setup_20.x -o nodesource_setup.sh && \
   bash nodesource_setup.sh && \
   apt-get install -y nodejs && \
+  apt-get clean && \
+  rm -f /var/lib/apt/lists/*_* && \
   npm install -g yarn && \
   # Install baseline Elixir packages
   mix local.hex --force && \

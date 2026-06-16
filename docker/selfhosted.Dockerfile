@@ -2,7 +2,7 @@
 # instead of Alpine to avoid DNS resolution issues in production.
 ARG ELIXIR_VERSION=1.18.4
 ARG OTP_VERSION=27.2.4
-ARG DEBIAN_VERSION=bookworm-20250428-slim
+ARG DEBIAN_VERSION=trixie-20260610-slim
 
 ARG BUILDER_IMAGE="hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}"
 ARG RUNNER_IMAGE="debian:${DEBIAN_VERSION}"
@@ -84,7 +84,7 @@ RUN apt-get update -y && \
     apt-get install -y \
       libstdc++6 \
       openssl \
-      libncurses5 \
+      libncurses6 \
       locales \
       ca-certificates \
       python3-mutagen \
@@ -126,7 +126,7 @@ ENV LC_ALL=en_US.UTF-8
 WORKDIR "/app"
 
 # Set up data volumes
-RUN mkdir -p /config /downloads /etc/elixir_tzdata_data /etc/yt-dlp/plugins && \ 
+RUN mkdir -p /config /downloads /etc/elixir_tzdata_data /etc/yt-dlp/plugins && \
   chmod ugo+rw /etc/elixir_tzdata_data /etc/yt-dlp /etc/yt-dlp/plugins /usr/local/bin /usr/local/bin/yt-dlp
 
 # set runner ENV
