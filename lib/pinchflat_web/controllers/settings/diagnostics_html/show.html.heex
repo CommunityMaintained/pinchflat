@@ -97,20 +97,15 @@
   <div class="rounded-sm border border-stroke bg-white px-5 py-5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 mb-6">
     <div class="flex justify-between items-center mb-4">
       <h3 class="text-lg font-semibold text-white">
-        <.icon name="hero-exclamation-triangle" class="h-5 w-5 text-yellow-500 mr-2" /> Stuck Jobs ({length(stuck)})
+        <.icon name="hero-exclamation-triangle" class="h-5 w-5 text-yellow-500 mr-2" />
+        Long-Running Jobs ({length(stuck)})
       </h3>
-      <.link
-        href={~p"/diagnostics/reset_stuck_jobs"}
-        method="post"
-        data-confirm="This will reset all stuck jobs. They will be retried. Continue?"
-      >
-        <.button color="bg-yellow-600" rounding="rounded-lg" class="text-sm">
-          <.icon name="hero-arrow-path" class="h-4 w-4 mr-1" /> Reset All Stuck Jobs
-        </.button>
-      </.link>
     </div>
     <p class="text-bodydark text-sm mb-4">
-      These jobs have been executing for more than 30 minutes and may be orphaned. This can happen after a container restart.
+      These jobs have been executing for more than 30 minutes. Orphaned jobs left behind by an
+      ungraceful shutdown are automatically recovered the next time Pinchflat restarts, so a job
+      here is usually just long-running (for example indexing a large channel or downloading a
+      long video). If one is genuinely hung, you can cancel it.
     </p>
     <div class="overflow-x-auto">
       <table class="w-full text-sm">
@@ -131,13 +126,6 @@
               <td class="py-2 text-white">{format_worker_name(job.worker)}</td>
               <td class="py-2 text-white">{format_datetime(job.attempted_at)}</td>
               <td class="py-2">
-                <.link
-                  href={~p"/diagnostics/reset_job/#{job.id}"}
-                  method="post"
-                  class="text-primary hover:underline mr-3"
-                >
-                  Reset
-                </.link>
                 <.link
                   href={~p"/diagnostics/cancel_job/#{job.id}"}
                   method="post"

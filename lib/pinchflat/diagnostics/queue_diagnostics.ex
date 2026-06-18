@@ -111,23 +111,6 @@ defmodule Pinchflat.Diagnostics.QueueDiagnostics do
   end
 
   @doc """
-  Resets stuck jobs by marking them as available for retry.
-  Returns the number of jobs reset.
-  """
-  def reset_stuck_jobs(threshold_minutes \\ 30) do
-    threshold = DateTime.add(DateTime.utc_now(), -threshold_minutes * 60, :second)
-
-    {count, _} =
-      from(j in Oban.Job,
-        where: j.state == "executing",
-        where: j.attempted_at < ^threshold
-      )
-      |> Repo.update_all(set: [state: "available", scheduled_at: DateTime.utc_now(), attempted_at: nil])
-
-    count
-  end
-
-  @doc """
   Resets all retryable jobs by clearing their error history and marking as available.
   Returns the number of jobs reset.
   """
@@ -143,12 +126,17 @@ defmodule Pinchflat.Diagnostics.QueueDiagnostics do
 
   @doc """
   Resets a specific job by ID.
+
+  Only retryable or discarded jobs can be reset. Executing jobs are deliberately
+  excluded: a job may be genuinely running, and flipping it back to available would
+  let a producer start a second copy concurrently (double execution). Orphaned
+  executing jobs are recovered at boot by `Pinchflat.Boot.PreJobStartupTasks`.
   """
   def reset_job(job_id) do
     {count, _} =
       from(j in Oban.Job,
         where: j.id == ^job_id,
-        where: j.state in ["retryable", "executing", "discarded"]
+        where: j.state in ["retryable", "discarded"]
       )
       |> Repo.update_all(set: [state: "available", attempt: 1, errors: [], scheduled_at: DateTime.utc_now()])
 

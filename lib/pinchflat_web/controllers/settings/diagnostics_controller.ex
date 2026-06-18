@@ -7,14 +7,6 @@ defmodule PinchflatWeb.Settings.DiagnosticsController do
     render(conn, "show.html")
   end
 
-  def reset_stuck_jobs(conn, _params) do
-    count = QueueDiagnostics.reset_stuck_jobs()
-
-    conn
-    |> put_flash(:info, "Reset #{count} stuck job(s). The queue will restart processing shortly.")
-    |> redirect(to: ~p"/diagnostics")
-  end
-
   def reset_retryable_jobs(conn, _params) do
     count = QueueDiagnostics.reset_retryable_jobs()
 
