@@ -24,11 +24,14 @@ defmodule PinchflatWeb.Settings.DiagnosticsController do
   end
 
   def reset_job(conn, %{"id" => job_id}) do
-    case QueueDiagnostics.reset_job(String.to_integer(job_id)) do
-      1 ->
-        conn
-        |> put_flash(:info, "Job ##{job_id} has been reset and will retry shortly.")
-        |> redirect(to: ~p"/diagnostics")
+    with {:ok, id} <- parse_job_id(job_id),
+         1 <- QueueDiagnostics.reset_job(id) do
+      conn
+      |> put_flash(:info, "Job ##{job_id} has been reset and will retry shortly.")
+      |> redirect(to: ~p"/diagnostics")
+    else
+      :error ->
+        invalid_job_id(conn, job_id)
 
       0 ->
         conn
@@ -38,16 +41,33 @@ defmodule PinchflatWeb.Settings.DiagnosticsController do
   end
 
   def cancel_job(conn, %{"id" => job_id}) do
-    case QueueDiagnostics.cancel_job(String.to_integer(job_id)) do
-      {:ok, :cancelled} ->
-        conn
-        |> put_flash(:info, "Job ##{job_id} has been cancelled.")
-        |> redirect(to: ~p"/diagnostics")
+    with {:ok, id} <- parse_job_id(job_id),
+         {:ok, :cancelled} <- QueueDiagnostics.cancel_job(id) do
+      conn
+      |> put_flash(:info, "Job ##{job_id} has been cancelled.")
+      |> redirect(to: ~p"/diagnostics")
+    else
+      :error ->
+        invalid_job_id(conn, job_id)
 
       {:error, _reason} ->
         conn
         |> put_flash(:error, "Job ##{job_id} could not be cancelled.")
         |> redirect(to: ~p"/diagnostics")
     end
+  end
+
+  # Guards against non-integer ids in the URL (which would otherwise raise).
+  defp parse_job_id(job_id) do
+    case Integer.parse(job_id) do
+      {id, ""} -> {:ok, id}
+      _ -> :error
+    end
+  end
+
+  defp invalid_job_id(conn, job_id) do
+    conn
+    |> put_flash(:error, "#{job_id} is not a valid job ID.")
+    |> redirect(to: ~p"/diagnostics")
   end
 end
