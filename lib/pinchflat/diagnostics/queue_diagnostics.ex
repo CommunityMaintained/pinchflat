@@ -213,12 +213,21 @@ defmodule Pinchflat.Diagnostics.QueueDiagnostics do
     db_path = Application.get_env(:pinchflat, Pinchflat.Repo)[:database]
 
     if db_path && File.exists?(db_path) do
-      case File.stat(db_path) do
-        {:ok, %{size: size}} -> format_bytes(size)
-        _ -> "Unknown"
-      end
+      # Include the WAL/SHM sidecar files so the figure reflects on-disk usage
+      # rather than just the main database file.
+      [db_path, db_path <> "-wal", db_path <> "-shm"]
+      |> Enum.map(&file_size/1)
+      |> Enum.sum()
+      |> format_bytes()
     else
       "Unknown"
+    end
+  end
+
+  defp file_size(path) do
+    case File.stat(path) do
+      {:ok, %{size: size}} -> size
+      _ -> 0
     end
   end
 
