@@ -61,6 +61,29 @@ defmodule Pinchflat.Diagnostics.QueueDiagnostics do
   end
 
   @doc """
+  Returns jobs that have been discarded (failed and exhausted all retries).
+  """
+  def get_discarded_jobs(limit \\ 50) do
+    from(j in Oban.Job,
+      where: j.state == "discarded",
+      order_by: [desc: j.discarded_at],
+      limit: ^limit,
+      select: %{
+        id: j.id,
+        queue: j.queue,
+        worker: j.worker,
+        state: j.state,
+        attempt: j.attempt,
+        max_attempts: j.max_attempts,
+        errors: j.errors,
+        args: j.args,
+        discarded_at: j.discarded_at
+      }
+    )
+    |> Repo.all()
+  end
+
+  @doc """
   Returns jobs that appear to be stuck (executing for too long or orphaned).
   A job is considered stuck if it's been "executing" for more than the threshold.
   """
@@ -121,7 +144,7 @@ defmodule Pinchflat.Diagnostics.QueueDiagnostics do
     {count, _} =
       from(j in Oban.Job,
         where: j.id == ^job_id,
-        where: j.state in ["retryable", "executing"]
+        where: j.state in ["retryable", "executing", "discarded"]
       )
       |> Repo.update_all(set: [state: "available", attempt: 1, errors: [], scheduled_at: DateTime.utc_now()])
 

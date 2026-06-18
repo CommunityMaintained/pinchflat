@@ -13,6 +13,10 @@ defmodule PinchflatWeb.Settings.DiagnosticsHTML do
     QueueDiagnostics.get_retryable_jobs(20)
   end
 
+  def discarded_jobs do
+    QueueDiagnostics.get_discarded_jobs(20)
+  end
+
   def stuck_jobs do
     QueueDiagnostics.get_stuck_jobs(30)
   end
