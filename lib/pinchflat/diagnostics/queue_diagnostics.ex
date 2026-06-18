@@ -8,18 +8,22 @@ defmodule Pinchflat.Diagnostics.QueueDiagnostics do
   alias Pinchflat.Media.MediaQuery
   alias Pinchflat.Repo
 
-  @queues [:default, :fast_indexing, :media_collection_indexing, :media_fetching, :remote_metadata, :local_data]
-
   @doc """
-  Returns a list of all queue names.
+  Returns a list of all queue names, derived from the Oban configuration so it
+  can't silently drift from the queues that actually run.
   """
-  def queue_names, do: @queues
+  def queue_names do
+    case Application.get_env(:pinchflat, Oban, [])[:queues] do
+      queues when is_list(queues) -> Keyword.keys(queues)
+      _ -> []
+    end
+  end
 
   @doc """
   Returns health status for all queues including job counts by state.
   """
   def get_all_queue_stats do
-    Enum.map(@queues, fn queue_name ->
+    Enum.map(queue_names(), fn queue_name ->
       queue_info = Oban.check_queue(queue: queue_name)
       job_counts = get_job_counts_for_queue(queue_name)
 
