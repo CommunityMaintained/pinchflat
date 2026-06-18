@@ -25,6 +25,16 @@ defmodule PinchflatWeb.Settings.DiagnosticsHTML do
     QueueDiagnostics.get_system_stats()
   end
 
+  def diagnostic_info_string do
+    """
+    - App Version: #{Application.spec(:pinchflat)[:vsn]}
+    - yt-dlp Version: #{Settings.get!(:yt_dlp_version)}
+    - Apprise Version: #{Settings.get!(:apprise_version)}
+    - System Architecture: #{to_string(:erlang.system_info(:system_architecture))}
+    - Timezone: #{Application.get_env(:pinchflat, :timezone)}
+    """
+  end
+
   def format_worker_name(worker) do
     worker
     |> String.split(".")

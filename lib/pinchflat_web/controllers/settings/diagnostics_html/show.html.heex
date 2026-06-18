@@ -1,8 +1,25 @@
 <div class="mb-6 flex gap-3 flex-row items-center justify-between">
   <div class="flex gap-3 items-center">
     <h2 class="text-title-md2 font-bold text-white ml-4">
-      Queue Diagnostics
+      Diagnostics
     </h2>
+  </div>
+  <div class="flex gap-4 items-center">
+    <.button color="bg-primary" rounding="rounded-lg" x-data="{ copied: false }" x-on:click={~s"
+        copyWithCallbacks(
+          `#{diagnostic_info_string()}`,
+          () => copied = true,
+          () => copied = false
+        )
+      "}>
+      Copy Diagnostic Info
+      <span x-show="copied" x-transition.duration.150ms><.icon name="hero-check" class="ml-2 h-4 w-4" /></span>
+    </.button>
+    <.link href={~p"/download_logs"}>
+      <.button color="bg-primary" rounding="rounded-lg">
+        Download Logs
+      </.button>
+    </.link>
   </div>
 </div>
 
