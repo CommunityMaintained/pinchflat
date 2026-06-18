@@ -5,6 +5,7 @@ defmodule Pinchflat.Diagnostics.QueueDiagnostics do
 
   import Ecto.Query
 
+  alias Pinchflat.Media.MediaQuery
   alias Pinchflat.Repo
 
   @queues [:default, :fast_indexing, :media_collection_indexing, :media_fetching, :remote_metadata, :local_data]
@@ -165,10 +166,12 @@ defmodule Pinchflat.Diagnostics.QueueDiagnostics do
   end
 
   defp count_pending_downloads do
-    from(m in Pinchflat.Media.MediaItem,
-      where: is_nil(m.media_filepath),
-      where: m.prevent_download == false
-    )
+    # Reuse the canonical pending definition so this matches what the app actually
+    # schedules for download (accounts for source cutoff, shorts/livestream rules,
+    # title regex and duration limits) rather than every un-downloaded item.
+    MediaQuery.new()
+    |> MediaQuery.require_assoc(:media_profile)
+    |> where(^MediaQuery.pending())
     |> Repo.aggregate(:count)
   end
 
