@@ -18,7 +18,13 @@ defmodule Pinchflat.Settings.AppriseServerLive do
       phx-change="apprise_server_changed"
     >
       <:input_append>
-        <.icon_button icon_name={@icon_name} class="h-12 w-12" phx-click="send_apprise_test" tooltip={@tooltip} />
+        <.icon_button
+          icon_name={@icon_name}
+          class="h-12 w-12 disabled:opacity-50 disabled:cursor-not-allowed"
+          phx-click="send_apprise_test"
+          tooltip={@tooltip}
+          disabled={blank?(@value)}
+        />
       </:input_append>
     </.input>
     """
@@ -35,10 +41,14 @@ defmodule Pinchflat.Settings.AppriseServerLive do
   end
 
   def handle_event("send_apprise_test", _params, %{assigns: assigns} = socket) do
-    backend_runner().run([assigns.value], title: "Pinchflat Test", body: "This is a test message from Pinchflat")
-    Process.send_after(self(), :reset_button_icon, 4_000)
+    if blank?(assigns.value) do
+      {:noreply, socket}
+    else
+      backend_runner().run([assigns.value], title: "Pinchflat Test", body: "This is a test message from Pinchflat")
+      Process.send_after(self(), :reset_button_icon, 4_000)
 
-    {:noreply, assign(socket, %{icon_name: "hero-check", tooltip: "Sent!"})}
+      {:noreply, assign(socket, %{icon_name: "hero-check", tooltip: "Sent!"})}
+    end
   end
 
   def handle_event("apprise_server_changed", %{"setting" => setting}, socket) do
@@ -48,6 +58,8 @@ defmodule Pinchflat.Settings.AppriseServerLive do
   def handle_info(:reset_button_icon, socket) do
     {:noreply, assign(socket, %{icon_name: "hero-paper-airplane", tooltip: "Send Test"})}
   end
+
+  defp blank?(value), do: value in [nil, ""] or String.trim(value) == ""
 
   defp backend_runner do
     Application.get_env(:pinchflat, :apprise_runner)

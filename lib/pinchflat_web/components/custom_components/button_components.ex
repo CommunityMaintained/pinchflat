@@ -101,7 +101,7 @@ defmodule PinchflatWeb.CustomComponents.ButtonComponents do
   attr :icon_name, :string, required: true
   attr :class, :string, default: ""
   attr :tooltip, :string, default: nil
-  attr :rest, :global
+  attr :rest, :global, include: ~w(disabled)
 
   def icon_button(assigns) do
     ~H"""

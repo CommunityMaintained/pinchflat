@@ -24,6 +24,29 @@ defmodule PinchflatWeb.Settings.AppriseServerLiveTest do
       assert html =~ "hero-paper-airplane"
       refute html =~ "hero-check"
     end
+
+    test "disables the test button when the input is blank", %{conn: conn} do
+      {:ok, _view, html} = live_isolated(conn, AppriseServerLive, session: create_session(""))
+
+      assert html =~ ~s(disabled)
+    end
+
+    test "enables the test button when the input has a value", %{conn: conn} do
+      {:ok, _view, html} = live_isolated(conn, AppriseServerLive, session: create_session("cool-value"))
+
+      refute html =~ ~s(disabled)
+    end
+  end
+
+  describe "when the input is blank" do
+    test "does not send a test message", %{conn: conn} do
+      {:ok, view, _html} = live_isolated(conn, AppriseServerLive, session: create_session(""))
+
+      # Mox is in :verify_on_exit! mode, so no `expect`/`stub` means a call would fail
+      assert view
+             |> element("button")
+             |> render_click()
+    end
   end
 
   describe "pressing the button" do
