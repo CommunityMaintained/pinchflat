@@ -26,15 +26,15 @@ defmodule PinchflatWeb.Settings.AppriseServerLiveTest do
     end
 
     test "disables the test button when the input is blank", %{conn: conn} do
-      {:ok, _view, html} = live_isolated(conn, AppriseServerLive, session: create_session(""))
+      {:ok, view, _html} = live_isolated(conn, AppriseServerLive, session: create_session(""))
 
-      assert html =~ ~s(disabled)
+      assert has_element?(view, "button[phx-click=send_apprise_test][disabled]")
     end
 
     test "enables the test button when the input has a value", %{conn: conn} do
-      {:ok, _view, html} = live_isolated(conn, AppriseServerLive, session: create_session("cool-value"))
+      {:ok, view, _html} = live_isolated(conn, AppriseServerLive, session: create_session("cool-value"))
 
-      refute html =~ ~s(disabled)
+      refute has_element?(view, "button[phx-click=send_apprise_test][disabled]")
     end
   end
 
@@ -42,10 +42,9 @@ defmodule PinchflatWeb.Settings.AppriseServerLiveTest do
     test "does not send a test message", %{conn: conn} do
       {:ok, view, _html} = live_isolated(conn, AppriseServerLive, session: create_session(""))
 
-      # Mox is in :verify_on_exit! mode, so no `expect`/`stub` means a call would fail
-      assert view
-             |> element("button")
-             |> render_click()
+      # Push the event directly (bypassing the disabled button) to verify the
+      # server-side guard. Mox's verify_on_exit! fails if the runner is called.
+      assert render_click(view, "send_apprise_test")
     end
   end
 

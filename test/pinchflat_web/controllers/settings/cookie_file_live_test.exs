@@ -7,7 +7,9 @@ defmodule PinchflatWeb.Settings.CookieFileLiveTest do
   alias Pinchflat.Settings.CookieFile
 
   setup do
-    base_dir = Path.join([System.tmp_dir!(), "cookie_live_test", Integer.to_string(:erlang.unique_integer([:positive]))])
+    base_dir =
+      Path.join([System.tmp_dir!(), "cookie_live_test", Integer.to_string(:erlang.unique_integer([:positive]))])
+
     File.mkdir_p!(base_dir)
     original = Application.get_env(:pinchflat, :extras_directory)
     Application.put_env(:pinchflat, :extras_directory, base_dir)
