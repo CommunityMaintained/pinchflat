@@ -93,9 +93,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
+      # For pull_request events GITHUB_SHA is the ephemeral merge commit
+      # (refs/pull/N/merge), not the PR's head commit. Tag with the head SHA so
+      # the image tag matches the commit the contributor actually pushed.
       - name: Get short SHA
         id: meta
-        run: echo "sha=${GITHUB_SHA:0:7}" >> $GITHUB_OUTPUT
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: echo "sha=${HEAD_SHA:0:7}" >> $GITHUB_OUTPUT
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
