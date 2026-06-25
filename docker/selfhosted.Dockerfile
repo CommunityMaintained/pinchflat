@@ -70,6 +70,7 @@ RUN apt-get update -y && \
       jq \
       # unzip is needed for Deno
       unzip \
+      sqlite3 \
       procps && \
     # Install Deno - required for YouTube downloads (See yt-dlp#14404)
     curl -fsSL https://deno.land/install.sh | DENO_INSTALL=/usr/local sh -s -- -y --no-modify-path && \
