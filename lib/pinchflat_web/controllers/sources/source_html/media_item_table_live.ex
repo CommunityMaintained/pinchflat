@@ -63,8 +63,18 @@ defmodule PinchflatWeb.Sources.MediaItemTableLive do
             </span>
           </section>
         </:col>
-        <:col :let={media_item} :if={@media_state == "other"} label="Manually Ignored?">
-          <.icon name={if media_item.prevent_download, do: "hero-check", else: "hero-x-mark"} />
+        <:col :let={media_item} :if={@media_state == "other"} label="Status">
+          <.tooltip :if={media_item.unavailable_at} tooltip={unavailable_tooltip(media_item)} position="bottom-right">
+            <span class="flex items-center space-x-1 text-amber-400">
+              <.icon name="hero-no-symbol" />
+              <span>Skipped &mdash; Unavailable</span>
+            </span>
+          </.tooltip>
+          <span :if={is_nil(media_item.unavailable_at) && media_item.prevent_download} class="flex items-center space-x-1">
+            <.icon name="hero-check" />
+            <span>Manually Ignored</span>
+          </span>
+          <.icon :if={is_nil(media_item.unavailable_at) && !media_item.prevent_download} name="hero-x-mark" />
         </:col>
         <:col :let={media_item} label="Upload Date">
           {DateTime.to_date(media_item.uploaded_at)}
@@ -217,6 +227,14 @@ defmodule PinchflatWeb.Sources.MediaItemTableLive do
 
   # Selecting only what we need GREATLY speeds up queries on large tables
   defp select_fields do
-    [:id, :title, :uploaded_at, :prevent_download, :last_error]
+    [:id, :title, :uploaded_at, :prevent_download, :last_error, :unavailable_at, :unavailable_reason]
+  end
+
+  defp unavailable_tooltip(%{unavailable_reason: reason}) when is_binary(reason) and reason != "" do
+    "Skipped: #{reason}"
+  end
+
+  defp unavailable_tooltip(_media_item) do
+    "Skipped: members-only, private, or removed"
   end
 end

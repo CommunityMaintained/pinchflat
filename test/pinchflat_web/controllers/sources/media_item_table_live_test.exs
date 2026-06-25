@@ -69,12 +69,30 @@ defmodule PinchflatWeb.Sources.MediaItemTableLiveTest do
       refute html =~ pending_media_item.title
     end
 
-    test "shows 'Manually Ignored' column when other", %{conn: conn, source: source} do
+    test "shows 'Manually Ignored' status when other", %{conn: conn, source: source} do
       _media_item = media_item_fixture(source_id: source.id, prevent_download: true, media_filepath: nil)
 
       {:ok, _view, html} = live_isolated(conn, MediaItemTableLive, session: create_session(source, "other"))
 
-      assert html =~ "Manually Ignored?"
+      assert html =~ "Status"
+      assert html =~ "Manually Ignored"
+    end
+
+    test "shows 'Skipped — Unavailable' status for unavailable media when other", %{conn: conn, source: source} do
+      _media_item =
+        media_item_fixture(
+          source_id: source.id,
+          media_filepath: nil,
+          prevent_download: true,
+          unavailable_at: DateTime.utc_now(),
+          unavailable_reason: "members-only content"
+        )
+
+      {:ok, _view, html} = live_isolated(conn, MediaItemTableLive, session: create_session(source, "other"))
+
+      assert html =~ "Skipped"
+      assert html =~ "Unavailable"
+      refute html =~ "Manually Ignored"
     end
   end
 
