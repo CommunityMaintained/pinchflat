@@ -17,10 +17,9 @@
 # Drift caveat: ci-base ships ffmpeg into selfhosted's runner, so bumping the ffmpeg
 # pin here changes the ffmpeg binary users get. Consumers should pin to :sha-<...>, not
 # :latest, so any base bump goes through a PR.
-
-ARG ELIXIR_VERSION=1.18.4
-ARG OTP_VERSION=27.2.4
-ARG DEBIAN_VERSION=trixie-20260610-slim
+ARG ELIXIR_VERSION=1.20.2
+ARG OTP_VERSION=28.5.0.2
+ARG DEBIAN_VERSION=trixie-20260623-slim
 # renovate: datasource=github-releases depName=denoland/deno
 ARG DENO_VERSION=v2.9.0
 # NOT renovate-tracked: ffmpeg is pinned for issue #347 (illegal instruction on some CPUs).
