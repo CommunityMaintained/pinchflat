@@ -13,7 +13,7 @@ on:
 
 env:
   # Pinned to a smoke-tested ci-base build. Bump via PR after a new ci-base.yml run.
-  CI_BASE_IMAGE: ghcr.io/communitymaintained/pinchflat-ci-base:sha-bb9ea60
+  CI_BASE_IMAGE: ghcr.io/communitymaintained/pinchflat-ci-base:sha-c5dc964
 
 jobs:
   test:
