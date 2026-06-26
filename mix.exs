@@ -105,11 +105,11 @@ defmodule Pinchflat.MixProject do
       "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"],
       "ecto.migrate": [
         "ecto.migrate",
-        ~s(cmd [ -z "$MIX_ENV" ] && yarn run create-erd || echo "No ERD generated")
+        ~s(cmd sh -c '[ -z "$MIX_ENV" ] && yarn run create-erd || echo "No ERD generated"')
       ],
       "ecto.rollback": [
         "ecto.rollback",
-        ~s(cmd [ -z "$MIX_ENV" ] && yarn run create-erd || echo "No ERD generated")
+        ~s(cmd sh -c '[ -z "$MIX_ENV" ] && yarn run create-erd || echo "No ERD generated"')
       ],
       "version.bump": "cmd ./tooling/version_bump.sh"
     ]
