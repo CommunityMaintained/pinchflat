@@ -11,7 +11,7 @@ docker compose up
 
 ## Dev Server (Native)
 
-Requires Elixir 1.17+, OTP 27, Node 20, Yarn, yt-dlp, ffmpeg.
+Requires Elixir 1.17+, OTP 27, Node 24, Yarn, yt-dlp, ffmpeg.
 
 ```bash
 mix setup              # deps + DB create/migrate/seed + assets

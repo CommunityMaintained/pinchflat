@@ -22,6 +22,8 @@ ARG OTP_VERSION=28.5.0.2
 ARG DEBIAN_VERSION=trixie-20260623-slim
 # renovate: datasource=github-releases depName=denoland/deno
 ARG DENO_VERSION=v2.9.0
+# renovate: datasource=node-version depName=node
+ARG NODE_MAJOR=24
 # NOT renovate-tracked: ffmpeg is pinned for issue #347 (illegal instruction on some CPUs).
 # Newer builds must be smoke-tested manually before bumping. FFMPEG_BUILD is paired with
 # FFMPEG_RELEASE — both come from the same yt-dlp/FFmpeg-Builds release page.
@@ -57,7 +59,7 @@ RUN echo "Building for ${TARGETPLATFORM:?}" && \
     curl -L ${FFMPEG_DOWNLOAD} --output /tmp/ffmpeg.tar.xz && \
     tar -xf /tmp/ffmpeg.tar.xz --strip-components=2 --no-anchored -C /usr/bin/ ffmpeg ffprobe && \
 # Install nodejs, Yarn, Deno, yt-dlp, and Apprise
-  curl -sL https://deb.nodesource.com/setup_20.x -o nodesource_setup.sh && \
+  curl -sL https://deb.nodesource.com/setup_${NODE_MAJOR}.x -o nodesource_setup.sh && \
   bash nodesource_setup.sh && \
   apt-get install -y nodejs && \
   apt-get clean && \
