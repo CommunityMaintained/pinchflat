@@ -72,8 +72,7 @@ defmodule Pinchflat.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:oban, "~> 2.17"},
       {:nimble_parsec, "~> 1.4"},
-      # See: https://github.com/bitwalker/timex/issues/778
-      {:timex, git: "https://github.com/bitwalker/timex.git", ref: "5ad1b8206977ebffb3bf72f88c18d490c36151c8"},
+      {:timex, "~> 3.7"},
       {:prom_ex, "~> 1.11.0"},
       {:mox, "~> 1.0", only: :test},
       {:credo, "~> 1.7.7", only: [:dev, :test], runtime: false},
