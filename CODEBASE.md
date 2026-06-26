@@ -70,11 +70,11 @@
 
 ### Observability
 
-| Technology                                     | Role                                                                            |
-| ---------------------------------------------- | ------------------------------------------------------------------------------- |
-| PromEx                                         | Prometheus metrics exporter for the BEAM, Ecto, Oban, Phoenix, and LiveView     |
-| Telemetry / TelemetryMetrics / TelemetryPoller | Instrumentation and metric aggregation                                          |
-| Phoenix LiveDashboard                          | Built-in runtime dashboard (process info, memory, etc.)                         |
+| Technology                                     | Role                                                                                         |
+| ---------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| PromEx                                         | Prometheus metrics exporter for the BEAM, Ecto, Oban, Phoenix, and LiveView                  |
+| Telemetry / TelemetryMetrics / TelemetryPoller | Instrumentation and metric aggregation                                                       |
+| Phoenix LiveDashboard                          | Built-in runtime dashboard (process info, memory, etc.)                                      |
 | Grafana                                        | 6 pre-built dashboards in `priv/grafana/` (BEAM, Ecto, Oban, Phoenix, LiveView, Application) |
 
 ### Elixir Libraries (notable)
@@ -135,30 +135,30 @@ esbuild and Tailwind are driven through Mix aliases defined in `mix.exs`, not st
 
 ## Docker
 
-| File                            | Used in    | Purpose                                                                                                               |
-| ------------------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------- |
-| `docker/ci-base.Dockerfile`     | CI/release | Shared base image (`ghcr.io/communitymaintained/pinchflat-ci-base`) — provides Elixir, OTP, Node, FFmpeg, yt-dlp, Deno, Apprise. Both dev and selfhosted images build FROM it so toolchain versions live in one place |
-| `docker/ci-base.requirements.txt` | CI/release | Pinned pip requirements (e.g. Apprise) installed into the ci-base image, managed by Renovate                       |
-| `docker/dev.Dockerfile`         | local only | Dev image — builds FROM `pinchflat-ci-base`, then installs dev extras (oh-my-zsh, dev deps)                          |
-| `docker/selfhosted.Dockerfile`  | CI/release | Production multi-stage build — builder stage runs on `pinchflat-ci-base` and compiles the OTP release; minimal runtime image with only production deps (ffmpeg/yt-dlp copied from the builder) |
-| `docker/docker-run.dev.sh`      | local only | Dev container startup script — installs deps, migrates DB, starts IEX Phoenix server                                  |
-| `docker-compose.yml`            | local only | Local dev environment (builds `dev.Dockerfile`, mounts working dir, exposes port 4008)                                |
-| `docker-compose.ci.yml`         | CI only    | CI test environment — same image, volume-cached deps, runs test suite                                                 |
+| File                              | Used in    | Purpose                                                                                                                                                                                                               |
+| --------------------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docker/ci-base.Dockerfile`       | CI/release | Shared base image (`ghcr.io/communitymaintained/pinchflat-ci-base`) — provides Elixir, OTP, Node, FFmpeg, yt-dlp, Deno, Apprise. Both dev and selfhosted images build FROM it so toolchain versions live in one place |
+| `docker/ci-base.requirements.txt` | CI/release | Pinned pip requirements (e.g. Apprise) installed into the ci-base image, managed by Renovate                                                                                                                          |
+| `docker/dev.Dockerfile`           | local only | Dev image — builds FROM `pinchflat-ci-base`, then installs dev extras (oh-my-zsh, dev deps)                                                                                                                           |
+| `docker/selfhosted.Dockerfile`    | CI/release | Production multi-stage build — builder stage runs on `pinchflat-ci-base` and compiles the OTP release; minimal runtime image with only production deps (ffmpeg/yt-dlp copied from the builder)                        |
+| `docker/docker-run.dev.sh`        | local only | Dev container startup script — installs deps, migrates DB, starts IEX Phoenix server                                                                                                                                  |
+| `docker-compose.yml`              | local only | Local dev environment (builds `dev.Dockerfile`, mounts working dir, exposes port 4008)                                                                                                                                |
+| `docker-compose.ci.yml`           | CI only    | CI test environment — same image, volume-cached deps, runs test suite                                                                                                                                                 |
 
 ---
 
 ## Release & Versioning
 
-| File                                      | Used in    | Purpose                                                                                           |
-| ----------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------- |
-| `version.txt`                             | CI/release | Single source of truth for current version, semver (read by CI for Docker image tags)             |
-| `release-please-config.json`              | CI/release | Release-Please config — "simple" release type managing root package                               |
-| `.release-please-manifest.json`           | CI/release | Release-Please version tracking manifest                                                          |
-| `CHANGELOG.md`                            | CI/release | Auto-generated release notes                                                                      |
+| File                                      | Used in    | Purpose                                                                                                                                 |
+| ----------------------------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `version.txt`                             | CI/release | Single source of truth for current version, semver (read by CI for Docker image tags)                                                   |
+| `release-please-config.json`              | CI/release | Release-Please config — "simple" release type managing root package                                                                     |
+| `.release-please-manifest.json`           | CI/release | Release-Please version tracking manifest                                                                                                |
+| `CHANGELOG.md`                            | CI/release | Auto-generated release notes                                                                                                            |
 | `tooling/version_bump.sh`                 | local only | Legacy bash script to bump version (YYYY.M.D date format) in `mix.exs` — predates release-please semver; prefer the release-please flow |
-| `rel/overlays/bin/docker_start`           | CI/release | OTP release entrypoint — runs `check_file_permissions`, sets umask, runs `migrate`, starts server |
-| `rel/overlays/bin/migrate`                | CI/release | Runs `Pinchflat.Release.migrate` in OTP release context                                           |
-| `rel/overlays/bin/check_file_permissions` | CI/release | Runs `Pinchflat.Release.check_file_permissions` in OTP release context                            |
+| `rel/overlays/bin/docker_start`           | CI/release | OTP release entrypoint — runs `check_file_permissions`, sets umask, runs `migrate`, starts server                                       |
+| `rel/overlays/bin/migrate`                | CI/release | Runs `Pinchflat.Release.migrate` in OTP release context                                                                                 |
+| `rel/overlays/bin/check_file_permissions` | CI/release | Runs `Pinchflat.Release.check_file_permissions` in OTP release context                                                                  |
 
 ---
 
