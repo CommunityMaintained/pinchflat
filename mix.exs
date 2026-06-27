@@ -81,7 +81,7 @@ defmodule Pinchflat.MixProject do
       # See https://github.com/elixirs/faker/pull/642 and https://github.com/elixirs/faker/issues/639
       # {:faker, "~> 0.17", only: :test},
       {:faker,
-       git: "https://github.com/OnetoOneHealth/faker.git", ref: "df3d9012933650cd685787e3bad3fbb94b379acd", only: :test},
+       git: "https://github.com/OnetoOneHealth/faker.git", ref: "1f42d2bf89f66214270804196b8863c860237518", only: :test},
       {:sobelow, "~> 0.14", only: [:dev, :test], runtime: false}
     ]
   end
