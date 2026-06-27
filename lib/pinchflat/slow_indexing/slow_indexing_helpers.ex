@@ -239,6 +239,12 @@ defmodule Pinchflat.SlowIndexing.SlowIndexingHelpers do
   defp build_download_archive_options(source, _was_forced) do
     archive_file = create_download_archive_file(source)
 
-    [:break_on_existing, download_archive: archive_file]
+    # `break_per_input` is important here: a channel URL expands into separate tabs
+    # (Videos, Shorts, Live) that yt-dlp walks sequentially. Without it, the default
+    # `--no-break-per-input` behaviour makes `--break-on-existing` terminate the entire
+    # run on the first archived item, so it would stop partway through the Videos tab and
+    # never reach the Shorts or Live tabs. Scoping the break to each input lets us stop
+    # early within a tab while still moving on to the others.
+    [:break_on_existing, :break_per_input, download_archive: archive_file]
   end
 end
