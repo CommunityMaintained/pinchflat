@@ -51,7 +51,7 @@ defmodule Pinchflat.MixProject do
     [
       {:phoenix, "~> 1.8.0"},
       {:phoenix_ecto, "~> 4.4"},
-      {:ecto, "~> 3.12.3"},
+      {:ecto, "~> 3.14.0"},
       {:ecto_sql, "~> 3.12"},
       {:ecto_sqlite3, ">= 0.0.0"},
       {:ecto_sqlite3_extras, "~> 1.2.0"},
