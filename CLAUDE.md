@@ -122,7 +122,9 @@ Use [Conventional Commits](https://www.conventionalcommits.org/):
 
 - `fix:` → patch release
 - `feat:` → minor release
-- `chore:` / `docs:` → no release bump
+- `chore:` / `docs:` / `perf:` / `revert:` / `style:` / `refactor:` / `test:` / `ci:` → no release bump
+
+Only `fix:`, `feat:`, and a `!` / `BREAKING CHANGE:` (major) bump the version. Every type above is recognized by release-please (see the `changelog-sections` in `release-please-config.json`) and is sorted into the changelog accordingly — `test:` and `ci:` are hidden. Prefer `chore(deps):` for dependency bumps; the legacy `deps:` type is also mapped to the Chores section but is being phased out, so don't use it for new commits.
 
 Always run prettier (`prettier . --check --config=.prettierrc.js --ignore-path=.prettierignore --ignore-path=.gitignore --write`) before staging and commiting files to ensure this doesn't fail in CI
 
