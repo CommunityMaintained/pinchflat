@@ -61,3 +61,9 @@ Requires `gh` CLI auth.
 bash tooling/list-images.sh                         # CommunityMaintained/pinchflat
 bash tooling/list-images.sh MyOrg my-image-name    # custom org/image
 ```
+
+## Misc
+
+### Channels with shorts uploaded mulitple times a day
+
+- <https://www.youtube.com/@lyndseydotw>
