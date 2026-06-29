@@ -67,3 +67,7 @@ bash tooling/list-images.sh MyOrg my-image-name    # custom org/image
 ### Channels with shorts uploaded mulitple times a day
 
 - <https://www.youtube.com/@lyndseydotw>
+
+### yt-dlp known issues/faq
+
+- <https://github.com/yt-dlp/yt-dlp/issues/3766>
