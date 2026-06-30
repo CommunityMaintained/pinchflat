@@ -5,8 +5,20 @@ defmodule Pinchflat.Diagnostics.QueueDiagnostics do
 
   import Ecto.Query
 
+  alias Pinchflat.Media.MediaItem
   alias Pinchflat.Media.MediaQuery
+  alias Pinchflat.Profiles.MediaProfile
   alias Pinchflat.Repo
+  alias Pinchflat.Sources.Source
+
+  # Worker (short) names grouped by the kind of record their "id" arg points at,
+  # so a diagnostics row can show what a job is actually working on.
+  @media_item_workers ~w(MediaDownloadWorker MediaQualityUpgradeWorker)
+  @source_workers ~w(
+    MediaCollectionIndexingWorker FastIndexingWorker
+    SourceMetadataStorageWorker SourceDeletionWorker FileSyncingWorker
+  )
+  @media_profile_workers ~w(MediaProfileDeletionWorker)
 
   @doc """
   Returns a list of all queue names, derived from the Oban configuration so it
@@ -38,6 +50,40 @@ defmodule Pinchflat.Diagnostics.QueueDiagnostics do
         executing: Map.get(job_counts, :executing, 0)
       }
     end)
+  end
+
+  @doc """
+  Returns the jobs currently sitting in a queue (executing, available, scheduled
+  or retryable), ordered so that what's running/runnable comes first. Capped by
+  `limit` so a deep backlog can't blow up the diagnostics page.
+  """
+  def get_jobs_for_queue(queue_name, limit \\ 50) do
+    queue_string = to_string(queue_name)
+
+    from(j in Oban.Job,
+      where: j.queue == ^queue_string,
+      where: j.state in ["executing", "available", "scheduled", "retryable"],
+      order_by: [
+        asc:
+          fragment(
+            "CASE ? WHEN 'executing' THEN 0 WHEN 'available' THEN 1 WHEN 'retryable' THEN 2 ELSE 3 END",
+            j.state
+          ),
+        asc: j.scheduled_at,
+        asc: j.id
+      ],
+      limit: ^limit,
+      select: %{
+        id: j.id,
+        worker: j.worker,
+        state: j.state,
+        attempt: j.attempt,
+        max_attempts: j.max_attempts,
+        args: j.args,
+        scheduled_at: j.scheduled_at
+      }
+    )
+    |> Repo.all()
   end
 
   @doc """
@@ -85,6 +131,52 @@ defmodule Pinchflat.Diagnostics.QueueDiagnostics do
       }
     )
     |> Repo.all()
+  end
+
+  @doc """
+  Resolves an Oban job's worker + args into a human-friendly description of the
+  record it's acting on (a Source, MediaItem or MediaProfile).
+
+  Returns a map with `:type`, `:id`, `:name` and (for media items) `:source_id`,
+  or `nil` when the job has no resolvable target. `:name` is `nil` when the record
+  has since been deleted, so callers can still show which id it referenced.
+  """
+  def describe_job(worker, args) do
+    short_name = worker |> to_string() |> String.split(".") |> List.last()
+    id = args["id"]
+
+    cond do
+      is_nil(id) -> nil
+      short_name in @media_item_workers -> describe_media_item(id)
+      short_name in @source_workers -> describe_source(id)
+      short_name in @media_profile_workers -> describe_media_profile(id)
+      true -> nil
+    end
+  end
+
+  defp describe_media_item(id) do
+    item =
+      from(m in MediaItem, where: m.id == ^id, select: %{source_id: m.source_id, name: m.title})
+      |> Repo.one()
+
+    case item do
+      nil -> %{type: :media_item, id: id, source_id: nil, name: nil}
+      %{source_id: source_id, name: name} -> %{type: :media_item, id: id, source_id: source_id, name: name}
+    end
+  end
+
+  defp describe_source(id) do
+    name =
+      from(s in Source, where: s.id == ^id, select: coalesce(s.custom_name, s.collection_name))
+      |> Repo.one()
+
+    %{type: :source, id: id, source_id: id, name: name}
+  end
+
+  defp describe_media_profile(id) do
+    name = from(p in MediaProfile, where: p.id == ^id, select: p.name) |> Repo.one()
+
+    %{type: :media_profile, id: id, name: name}
   end
 
   @doc """
@@ -150,6 +242,24 @@ defmodule Pinchflat.Diagnostics.QueueDiagnostics do
     case Oban.cancel_job(job_id) do
       :ok -> {:ok, :cancelled}
       {:error, reason} -> {:error, reason}
+    end
+  end
+
+  @doc """
+  Permanently deletes a discarded job by ID so it stops showing up in diagnostics.
+
+  Scoped to `discarded` jobs only: deleting an available/scheduled/retryable job
+  would silently drop work that's still meant to run, and Oban won't delete an
+  executing job anyway.
+  """
+  def delete_discarded_job(job_id) do
+    case Repo.get_by(Oban.Job, id: job_id, state: "discarded") do
+      nil ->
+        {:error, :not_found}
+
+      job ->
+        :ok = Oban.delete_job(job)
+        {:ok, :deleted}
     end
   end
 

@@ -21,6 +21,55 @@ defmodule PinchflatWeb.Settings.DiagnosticsHTML do
     QueueDiagnostics.get_stuck_jobs(30)
   end
 
+  @queue_job_limit 50
+
+  def queue_jobs(queue_name) do
+    QueueDiagnostics.get_jobs_for_queue(queue_name, @queue_job_limit)
+  end
+
+  def queue_job_limit, do: @queue_job_limit
+
+  def job_state_class("executing"), do: "text-green-400"
+  def job_state_class("available"), do: "text-blue-400"
+  def job_state_class("retryable"), do: "text-red-400"
+  def job_state_class(_), do: "text-bodydark"
+
+  attr :worker, :string, required: true
+  attr :args, :map, required: true
+
+  @doc """
+  Renders what a job is acting on (a Source/MediaItem/MediaProfile), linking to
+  the record when it still exists.
+  """
+  def job_details(assigns) do
+    assigns = assign(assigns, :target, QueueDiagnostics.describe_job(assigns.worker, assigns.args))
+
+    ~H"""
+    <%= case @target do %>
+      <% nil -> %>
+        <span class="text-bodydark">-</span>
+      <% %{type: :source, id: id, name: name} -> %>
+        <.job_details_link href={~p"/sources/#{id}/#tab-tasks"} label={name} fallback={"Source ##{id}"} />
+      <% %{type: :media_item, id: id, source_id: source_id, name: name} when not is_nil(source_id) -> %>
+        <.job_details_link href={~p"/sources/#{source_id}/media/#{id}"} label={name} fallback={"Media ##{id}"} />
+      <% %{type: :media_item, id: id, name: name} -> %>
+        <span class="text-bodydark" title="The media item no longer exists">{name || "Media ##{id} (deleted)"}</span>
+      <% %{type: :media_profile, id: id, name: name} -> %>
+        <.job_details_link href={~p"/media_profiles/#{id}"} label={name} fallback={"Profile ##{id}"} />
+    <% end %>
+    """
+  end
+
+  attr :href, :string, required: true
+  attr :label, :string, default: nil
+  attr :fallback, :string, required: true
+
+  defp job_details_link(assigns) do
+    ~H"""
+    <.link href={@href} class="text-primary hover:underline">{@label || @fallback}</.link>
+    """
+  end
+
   def system_stats do
     QueueDiagnostics.get_system_stats()
   end

@@ -55,6 +55,7 @@ defmodule PinchflatWeb.Router do
     post "/diagnostics/reset_retryable_jobs", Settings.DiagnosticsController, :reset_retryable_jobs
     post "/diagnostics/reset_job/:id", Settings.DiagnosticsController, :reset_job
     post "/diagnostics/cancel_job/:id", Settings.DiagnosticsController, :cancel_job
+    post "/diagnostics/delete_job/:id", Settings.DiagnosticsController, :delete_job
 
     resources "/sources", Sources.SourceController do
       post "/force_download_pending", Sources.SourceController, :force_download_pending

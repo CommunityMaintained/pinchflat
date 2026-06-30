@@ -85,7 +85,7 @@ Key workers:
 - `lib/pinchflat/podcasts/` — builds podcast RSS and OPML feeds so Sources can be consumed by podcast apps.
 - `lib/pinchflat/lifecycle/` — side effects around media lifecycle: Apprise `notifications` and user-defined `user_scripts` run via command runners.
 - `lib/pinchflat/http/` — small HTTP client behaviour (`http_behaviour.ex` / `http_client.ex`) for RSS fetches and similar, mockable in tests.
-- `lib/pinchflat/diagnostics/` — `QueueDiagnostics` powers the Oban queue diagnostics page in the UI.
+- `lib/pinchflat/diagnostics/` — `QueueDiagnostics` powers the Oban queue diagnostics page in the UI. Each queue card on the page can be expanded to list the jobs currently in that queue (capped at 50, via `get_jobs_for_queue/2`). Discarded jobs can be reset or permanently deleted (`delete_discarded_job/1`), and a "Details" column resolves each job's args to the Source/MediaItem/MediaProfile it targets (`describe_job/2`).
 
 ### Indexing: fast vs slow
 
