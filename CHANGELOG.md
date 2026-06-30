@@ -1,5 +1,65 @@
 # Changelog
 
+## [1.3.0](https://github.com/CommunityMaintained/pinchflat/compare/v1.2.0...v1.3.0) (2026-06-30)
+
+
+### Features
+
+* add queue visibility and discarded job management to diagnostics ([5343985](https://github.com/CommunityMaintained/pinchflat/commit/5343985e6614d448cd0e3b1e56e78569be008800))
+* control yt-dlp update behavior from settings ([058ba47](https://github.com/CommunityMaintained/pinchflat/commit/058ba4762a5415246cf73f4e68cddda68bc1f295))
+
+
+### Bug Fixes
+
+* avoid length/1 check and reformat mix.exs deps ([4d3986a](https://github.com/CommunityMaintained/pinchflat/commit/4d3986acfee4a5762f2357518b2db6f1008b1e87))
+* configure Oban PG notifier and incomplete unique states for 2.23 ([0fb0183](https://github.com/CommunityMaintained/pinchflat/commit/0fb018302e699e106c5c8d0e552e3c69b08509b6))
+* keep indexing reschedule from deduping against its own executing job ([115f8db](https://github.com/CommunityMaintained/pinchflat/commit/115f8db8ef6e6b1a7edf72844536a8ade2f9e0a1))
+* pin Deno and Apprise in selfhosted runner to match ci-base ([b9b372c](https://github.com/CommunityMaintained/pinchflat/commit/b9b372cbabf956fd4eabecf82de6c843cda7cae4))
+* resolve Elixir 1.20 compiler warnings ([43ea35d](https://github.com/CommunityMaintained/pinchflat/commit/43ea35dcf9ee8ef8b73ddd861b16326230af4320))
+* route ecto.migrate ERD guard through sh for Elixir 1.20 ([04cf3f3](https://github.com/CommunityMaintained/pinchflat/commit/04cf3f3ccfac71f5c8f17472b8eba20ca54d8439))
+* update formatting for phoenix ([cd6cc8b](https://github.com/CommunityMaintained/pinchflat/commit/cd6cc8b542ac405074ed773dc34314bdc3d89300))
+
+
+### Reverts
+
+* Move Active Tasks to tab in Media History section ([#836](https://github.com/CommunityMaintained/pinchflat/issues/836)) ([59849e3](https://github.com/CommunityMaintained/pinchflat/commit/59849e342817d1961feb147c6c0b0aa325a993e3))
+
+
+### Chores
+
+* add tooling script ([460fbd1](https://github.com/CommunityMaintained/pinchflat/commit/460fbd1c6ce7783bbae8932ed64ee24ea4325a2e))
+* **ci:** run lint/test jobs natively in ci-base container ([e5430f2](https://github.com/CommunityMaintained/pinchflat/commit/e5430f2a96cf58bc13f7ea8d904b8ffe86ab963b))
+* **deps:** alpinejs 3.15.12 ([a12f722](https://github.com/CommunityMaintained/pinchflat/commit/a12f72252945aa5fcb50f7f2af77c470aaacd64b))
+* **deps:** bump Elixir 1.20.2, OTP 28.5.0.2, Debian trixie-20260623 in ci-base ([95b825a](https://github.com/CommunityMaintained/pinchflat/commit/95b825afc7bf93dc96d469f30252d6db0157bd48))
+* **deps:** bump Node 20 -&gt; 24 in ci-base, add renovate tracking, sync CODEBASE versions ([f22adc4](https://github.com/CommunityMaintained/pinchflat/commit/f22adc49c18a5734476dee61165b3496368e4501))
+* **deps:** faker to work with elixir 1.20; update misc deps ([edbff35](https://github.com/CommunityMaintained/pinchflat/commit/edbff3587d58f72023e4685e114f1700d7fbbe50))
+* **deps:** pin dependencies ([e002b75](https://github.com/CommunityMaintained/pinchflat/commit/e002b7547bf9f374069a7983d79b0d68d541aaa8))
+* **deps:** pin elixir in renovate ([cb55b03](https://github.com/CommunityMaintained/pinchflat/commit/cb55b0300e14b513e86374e199f9787415e21731))
+* **deps:** replace floki with lazy_html ([13d7924](https://github.com/CommunityMaintained/pinchflat/commit/13d79242daf9b7a16a4358ccf82369d4a38782a7))
+* **deps:** update dependency alpinejs to v3.15.12 ([a753ff8](https://github.com/CommunityMaintained/pinchflat/commit/a753ff8f4cd2535ce0a216b58c9e2f248b007801))
+* **deps:** update dependency exqlite to 0.38.0 ([6e2dc17](https://github.com/CommunityMaintained/pinchflat/commit/6e2dc17dc7d0b7dcfbcff8d15fce4228713180d6))
+* **deps:** update dependency phoenix to ~&gt; 1.8.0 ([9c0f74d](https://github.com/CommunityMaintained/pinchflat/commit/9c0f74dcdcc53059a86a4639eff7ef6aee440bd9))
+* **deps:** update dependency phoenix_live_view to v1.2.4 ([a239149](https://github.com/CommunityMaintained/pinchflat/commit/a2391491ece970bb80fb15ecc87d14c75624ac41))
+* **deps:** update dependency phoenix_live_view to v1.2.5 ([b2d638e](https://github.com/CommunityMaintained/pinchflat/commit/b2d638e6016be4fbd97211354e18e5b2213214f8))
+* **deps:** update dependency prettier to v3.8.5 ([9389279](https://github.com/CommunityMaintained/pinchflat/commit/93892793013fe284804494867fe81a38fa99c3ea))
+* **deps:** update dependency prettier to v3.9.0 ([2e9301a](https://github.com/CommunityMaintained/pinchflat/commit/2e9301a1bd3f4430a1ad53cea9aa74f318aae252))
+* **deps:** update dependency prettier to v3.9.1 ([a66decb](https://github.com/CommunityMaintained/pinchflat/commit/a66decb323fe6c1480a18f0f1fe20bcaf96dbaa8))
+* **deps:** update dependency prettier to v3.9.3 ([8130c84](https://github.com/CommunityMaintained/pinchflat/commit/8130c84d5372f3f56210bdb8c4480447041864f5))
+* **deps:** update dependency prettier to v3.9.4 ([d2c4d45](https://github.com/CommunityMaintained/pinchflat/commit/d2c4d45215b4874fdbdd6321a9f3317e6aaf4ade))
+* **deps:** update dependency tailwind to ~&gt; 0.5.0 ([9e38148](https://github.com/CommunityMaintained/pinchflat/commit/9e38148d894629d3deb52e95935dcc69564e6d57))
+* **deps:** update phoenix_live_view ([e0651b6](https://github.com/CommunityMaintained/pinchflat/commit/e0651b68765431dcb5bdfde5ec6463b41d545e24))
+* **deps:** update renovate constraints ([7051c58](https://github.com/CommunityMaintained/pinchflat/commit/7051c58c92809767826639f5ad9bcf6f2ac7ea19))
+* **deps:** update timex digest to 3.7.13 ([e4f9983](https://github.com/CommunityMaintained/pinchflat/commit/e4f99831d2540f7cf98e05d68daea740b1f1c1b1))
+* **deps:** update timex digest to 5ad1b82 ([83710dc](https://github.com/CommunityMaintained/pinchflat/commit/83710dcb75b88ede0e97451883424bc6d8920665))
+* **deps:** use new elixir/otp ([f5e830b](https://github.com/CommunityMaintained/pinchflat/commit/f5e830b97a7e553c3660e14f93d8b76316b98b1a))
+* schedule renovate biweekly, remove PR rate limits, enable dependency dashboard ([efe8668](https://github.com/CommunityMaintained/pinchflat/commit/efe8668216c4070ad443935958157f8466f9f6b5))
+* tune release-please changelog sections ([5e1fa12](https://github.com/CommunityMaintained/pinchflat/commit/5e1fa12cb63113ac3a283d0b8f4b07ac483e9b78))
+
+
+### Documentation
+
+* reference yt-dlp faq ([80529fc](https://github.com/CommunityMaintained/pinchflat/commit/80529fc7d3b32dcc831e5918ebf7029f66932792))
+
 ## [1.2.0](https://github.com/CommunityMaintained/pinchflat/compare/v1.1.0...v1.2.0) (2026-06-26)
 
 
