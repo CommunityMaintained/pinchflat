@@ -79,6 +79,7 @@ If it doesn't work for your use case, please make a feature request! You can als
 - Reliable hands-off operation
 - Can pass cookies to YouTube to download your private playlists ([docs](https://github.com/CommunityMaintained/pinchflat/wiki/YouTube-Cookies))
 - Sponsorblock integration
+- \[Advanced\] control how `yt-dlp` updates from Settings - track stable or nightly, pin an exact version, or temporarily ride nightly and auto-return to stable once the fix lands there
 - \[Advanced\] allows custom `yt-dlp` options ([docs](https://github.com/CommunityMaintained/pinchflat/wiki/%5BAdvanced%5D-Custom-yt%E2%80%90dlp-options))
 - \[Advanced\] supports running custom scripts when after downloading/deleting media (alpha - [docs](https://github.com/CommunityMaintained/pinchflat/wiki/%5BAdvanced%5D-Custom-lifecycle-scripts))
 

@@ -86,6 +86,17 @@
           </span>
           <span class="group relative flex items-center gap-2.5 px-4 pt-2 text-sm">
             yt-dlp {Settings.get!(:yt_dlp_version)}
+            <span
+              :if={Settings.get!(:yt_dlp_update_policy) != "stable"}
+              class="bg-meta-2 text-boxdark px-1.5 rounded-full text-xs whitespace-nowrap text-center leading-tight"
+              title="yt-dlp update behavior"
+            >
+              {Phoenix.HTML.raw(
+                Pinchflat.YtDlp.UpdateManager.humanize_policy(Settings.get!(:yt_dlp_update_policy))
+                |> String.replace(" until ", " until<br />")
+                |> String.replace(", ", ",<br />")
+              )}
+            </span>
           </span>
         </li>
       </ul>
