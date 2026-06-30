@@ -130,6 +130,8 @@ Always run prettier (`prettier . --check --config=.prettierrc.js --ignore-path=.
 
 Releases are automated via release-please using semantic versioning (current version tracked in `version.txt`, e.g. `1.2.0`). Merging the release PR cuts a release and publishes Docker images to GHCR and Docker Hub. (`mix version.bump` / `tooling/version_bump.sh` still produce a legacy date-based `YYYY.M.D` version and predate the move to release-please — prefer the release-please flow.)
 
+Never push commits unless explicitly asked to do. I prefer commits amended if the work is related to a new feature or a new fix.
+
 ## Local Development Guide
 
 - @DEVELOPMENT.md contains instructions for local dev practices
