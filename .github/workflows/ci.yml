@@ -37,13 +37,24 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 # v4
+
       - name: Pull prebuilt images
         run: docker compose pull
 
       # Compose builds the dev image from docker-compose.ci.yml, which passes
       # BASE_IMAGE=${CI_BASE_IMAGE} so lint/test run on the sha-pinned ci-base.
+      # COMPOSE_BAKE delegates the build to buildx bake so the type=gha cache
+      # backend (cache_from/cache_to in the compose file) is available, caching
+      # the compiled-deps layer across runs.
+      - name: Build image
+        run: docker compose build
+        env:
+          COMPOSE_BAKE: 'true'
+
       - name: Run Docker image
-        run: docker compose up --detach --build
+        run: docker compose up --detach
 
       # NOTE: All exec commands use the -T flag to compensate for
       # a bug in the GitHub Actions runner where its stdin/stderr
