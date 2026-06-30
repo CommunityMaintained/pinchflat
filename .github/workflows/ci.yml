@@ -13,6 +13,8 @@ on:
 
 env:
   # Pinned to a smoke-tested ci-base build. Bump via PR after a new ci-base.yml run.
+  # NOTE: keep this in sync with the test job's container.image — the env context
+  # isn't available there, so the SHA is duplicated and must be bumped in both.
   CI_BASE_IMAGE: ghcr.io/communitymaintained/pinchflat-ci-base:sha-c5dc964
 
 jobs:
@@ -22,56 +24,59 @@ jobs:
     permissions:
       contents: read
       packages: read
+    # Run every step natively inside the sha-pinned ci-base image (Elixir, OTP,
+    # Node, yt-dlp, ffmpeg, Deno, Apprise all baked in). GitHub mounts the
+    # workspace into the container, so no compose, no detached keepalive, and no
+    # `exec -T` TTY workaround are needed.
+    container:
+      image: ghcr.io/communitymaintained/pinchflat-ci-base:sha-c5dc964
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
     env:
-      COMPOSE_FILE: ./docker-compose.ci.yml
       MIX_ENV: test
 
     steps:
       - name: Checkout code
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
 
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4
+      # Some tests and fixtures hardcode /app (the historical compose bind-mount
+      # point) — e.g. paths baked into test/support/files/*.json and the 101/100
+      # exit-code mock scripts. Point /app at the checked-out workspace so those
+      # absolute paths resolve under the container: runner without touching code.
+      - name: Symlink workspace to /app
+        run: |
+          rm -rf /app
+          ln -s "$GITHUB_WORKSPACE" /app
+
+      # Cache compiled deps and node_modules keyed on the lockfiles. Unlike the
+      # old Docker-layer cache (which rarely hit), this restores the actual
+      # deps/_build/node_modules dirs the steps below read from.
+      - name: Cache deps and build
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          path: |
+            deps
+            _build
+            node_modules
+            assets/node_modules
+          key: ${{ runner.os }}-mix-${{ hashFiles('mix.lock', 'mix.exs', 'yarn.lock', 'assets/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 # v4
-
-      - name: Pull prebuilt images
-        run: docker compose pull
-
-      # Compose builds the dev image from docker-compose.ci.yml, which passes
-      # BASE_IMAGE=${CI_BASE_IMAGE} so lint/test run on the sha-pinned ci-base.
-      # COMPOSE_BAKE delegates the build to buildx bake so the type=gha cache
-      # backend (cache_from/cache_to in the compose file) is available, caching
-      # the compiled-deps layer across runs.
-      - name: Build image
-        run: docker compose build
-        env:
-          COMPOSE_BAKE: 'true'
-
-      - name: Run Docker image
-        run: docker compose up --detach
-
-      # NOTE: All exec commands use the -T flag to compensate for
-      # a bug in the GitHub Actions runner where its stdin/stderr
-      # will erroneously report that it's a TTY.
-      # Aside from handling this bug the -T flag is not required
-      # See https://github.com/actions/runner/issues/241 and https://github.com/docker/compose/issues/8537
       - name: Install Elixir and JS deps
         run: |
-          docker compose exec -T phx mix deps.get && yarn install && cd assets && yarn install && cd ..
+          mix deps.get
+          yarn install
+          (cd assets && yarn install)
 
       - name: Create and Migrate database
         run: |
-          docker compose exec -T phx mix ecto.create
-          docker compose exec -T phx mix ecto.migrate
+          mix ecto.create
+          mix ecto.migrate
 
       - name: Run code checks
-        run: docker compose exec -T phx mix check --no-fix --no-retry
+        run: mix check --no-fix --no-retry
 
   docker-pr:
     name: Build PR Image
