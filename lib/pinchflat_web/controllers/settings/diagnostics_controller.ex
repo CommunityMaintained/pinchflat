@@ -49,6 +49,23 @@ defmodule PinchflatWeb.Settings.DiagnosticsController do
     end
   end
 
+  def delete_job(conn, %{"id" => job_id}) do
+    with {:ok, id} <- parse_job_id(job_id),
+         {:ok, :deleted} <- QueueDiagnostics.delete_discarded_job(id) do
+      conn
+      |> put_flash(:info, "Job ##{job_id} has been deleted.")
+      |> redirect(to: ~p"/diagnostics")
+    else
+      :error ->
+        invalid_job_id(conn, job_id)
+
+      {:error, _reason} ->
+        conn
+        |> put_flash(:error, "Job ##{job_id} could not be deleted. It may have already been removed.")
+        |> redirect(to: ~p"/diagnostics")
+    end
+  end
+
   # Guards against non-integer ids in the URL (which would otherwise raise).
   defp parse_job_id(job_id) do
     case Integer.parse(job_id) do
