@@ -23,6 +23,7 @@ jobs:
     permissions:
       packages: write
       actions: read
+      pull-requests: write
     steps:
       # release-please PRs (and any run where docker-pr was skipped) produce no
       # pr-image artifact. Detect that and no-op instead of failing noisily.
@@ -73,3 +74,16 @@ jobs:
           docker tag "pinchflat-pr:${{ steps.meta.outputs.pr }}" "$tag"
           docker push "$tag"
           echo "Pushed $tag"
+
+      # Comment the published tag back on the PR. workflow_run runs in the
+      # base-repo context with a write token, so this works for fork PRs too.
+      # One comment per push (duplicates accepted) — each documents the image
+      # for that specific head SHA.
+      - name: Comment image tag on PR
+        if: steps.check.outputs.exists == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ghcr.io/${{ steps.meta.outputs.repo }}-dev:pr-${{ steps.meta.outputs.pr }}-${{ steps.meta.outputs.sha }}
+        run: |
+          gh api "repos/${{ github.repository }}/issues/${{ steps.meta.outputs.pr }}/comments" \
+            -f body="🐳 Image for commit ${{ steps.meta.outputs.sha }} published: \`${TAG}\`"
