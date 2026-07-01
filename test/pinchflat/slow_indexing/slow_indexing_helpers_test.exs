@@ -473,6 +473,7 @@ defmodule Pinchflat.SlowIndexing.SlowIndexingHelpersTest do
 
       expect(YtDlpRunnerMock, :run, fn _url, :get_media_attributes_for_collection, opts, _ot, _addl_opts ->
         assert :break_on_existing in opts
+        assert :break_per_input in opts
         assert Keyword.has_key?(opts, :download_archive)
 
         {:ok, source_attributes_return_fixture()}
@@ -486,6 +487,7 @@ defmodule Pinchflat.SlowIndexing.SlowIndexingHelpersTest do
 
       expect(YtDlpRunnerMock, :run, fn _url, :get_media_attributes_for_collection, opts, _ot, _addl_opts ->
         refute :break_on_existing in opts
+        refute :break_per_input in opts
         refute Keyword.has_key?(opts, :download_archive)
 
         {:ok, source_attributes_return_fixture()}
@@ -499,6 +501,7 @@ defmodule Pinchflat.SlowIndexing.SlowIndexingHelpersTest do
 
       expect(YtDlpRunnerMock, :run, fn _url, :get_media_attributes_for_collection, opts, _ot, _addl_opts ->
         refute :break_on_existing in opts
+        refute :break_per_input in opts
         refute Keyword.has_key?(opts, :download_archive)
 
         {:ok, source_attributes_return_fixture()}
@@ -512,6 +515,7 @@ defmodule Pinchflat.SlowIndexing.SlowIndexingHelpersTest do
 
       expect(YtDlpRunnerMock, :run, fn _url, :get_media_attributes_for_collection, opts, _ot, _addl_opts ->
         refute :break_on_existing in opts
+        refute :break_per_input in opts
         refute Keyword.has_key?(opts, :download_archive)
 
         {:ok, source_attributes_return_fixture()}
