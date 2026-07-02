@@ -49,29 +49,40 @@ defmodule Pinchflat.Metadata.SourceMetadataStorageWorker do
   @impl Oban.Worker
   def perform(%Oban.Job{args: %{"id" => source_id}}) do
     source = Repo.preload(Sources.get_source!(source_id), [:metadata, :media_profile])
-    series_directory = determine_series_directory(source)
 
-    {source_metadata, source_image_attrs, metadata_image_attrs} =
-      fetch_source_metadata_and_images(series_directory, source)
+    with {:ok, series_directory} <- determine_series_directory(source),
+         {:ok, source_metadata, source_image_attrs, metadata_image_attrs} <-
+           fetch_source_metadata_and_images(series_directory, source) do
+      source_metadata_filepath = MetadataFileHelpers.compress_and_store_metadata_for(source, source_metadata)
 
-    source_metadata_filepath = MetadataFileHelpers.compress_and_store_metadata_for(source, source_metadata)
+      Sources.update_source(
+        source,
+        Map.merge(
+          %{
+            series_directory: series_directory,
+            nfo_filepath: store_source_nfo(source, series_directory, source_metadata),
+            description: source_metadata["description"],
+            metadata: Map.merge(%{metadata_filepath: source_metadata_filepath}, metadata_image_attrs)
+          },
+          source_image_attrs
+        ),
+        # `run_post_commit_tasks: false` prevents this from running in an infinite loop
+        run_post_commit_tasks: false
+      )
 
-    Sources.update_source(
-      source,
-      Map.merge(
-        %{
-          series_directory: series_directory,
-          nfo_filepath: store_source_nfo(source, series_directory, source_metadata),
-          description: source_metadata["description"],
-          metadata: Map.merge(%{metadata_filepath: source_metadata_filepath}, metadata_image_attrs)
-        },
-        source_image_attrs
-      ),
-      # `run_post_commit_tasks: false` prevents this from running in an infinite loop
-      run_post_commit_tasks: false
-    )
+      :ok
+    else
+      # A failed metadata/details fetch used to blow up here via a strict `{:ok, _} =` match,
+      # producing an opaque MatchError crash-loop. Instead, surface source context and let the
+      # job fail (and retry) cleanly. The raw yt-dlp response is logged by `MediaCollection`.
+      error ->
+        Logger.error(
+          "#{__MODULE__} could not fetch metadata for source ##{source_id} (#{source.original_url}): " <>
+            "#{inspect(error)}. See the preceding yt-dlp log line for the raw response."
+        )
 
-    :ok
+        {:error, :source_metadata_fetch_failed}
+    end
   rescue
     Ecto.NoResultsError -> Logger.info("#{__MODULE__} discarded: source #{source_id} not found")
     Ecto.StaleEntryError -> Logger.info("#{__MODULE__} discarded: source #{source_id} stale")
@@ -80,15 +91,20 @@ defmodule Pinchflat.Metadata.SourceMetadataStorageWorker do
   defp fetch_source_metadata_and_images(series_directory, source) do
     metadata_directory = MetadataFileHelpers.metadata_directory_for(source)
 
-    {:ok, metadata} = maybe_ignore_unavailable_source_metadata(source, fetch_metadata_for_source(source))
-    metadata_image_attrs = SourceImageParser.store_source_images(metadata_directory, metadata)
+    case maybe_ignore_unavailable_source_metadata(source, fetch_metadata_for_source(source)) do
+      {:ok, metadata} ->
+        metadata_image_attrs = SourceImageParser.store_source_images(metadata_directory, metadata)
 
-    if source.media_profile.download_source_images && series_directory do
-      source_image_attrs = SourceImageParser.store_source_images(series_directory, metadata)
+        if source.media_profile.download_source_images && series_directory do
+          source_image_attrs = SourceImageParser.store_source_images(series_directory, metadata)
 
-      {metadata, source_image_attrs, metadata_image_attrs}
-    else
-      {metadata, %{}, metadata_image_attrs}
+          {:ok, metadata, source_image_attrs, metadata_image_attrs}
+        else
+          {:ok, metadata, %{}, metadata_image_attrs}
+        end
+
+      err ->
+        err
     end
   end
 
@@ -116,11 +132,16 @@ defmodule Pinchflat.Metadata.SourceMetadataStorageWorker do
     output_path = DownloadOptionBuilder.build_output_path_for(source)
     runner_opts = [output: output_path]
     addl_opts = [use_cookies: Sources.use_cookies?(source, :metadata)]
-    {:ok, %{filepath: filepath}} = MediaCollection.get_source_details(source.original_url, runner_opts, addl_opts)
 
-    case MetadataFileHelpers.series_directory_from_media_filepath(filepath) do
-      {:ok, series_directory} -> series_directory
-      {:error, _} -> nil
+    case MediaCollection.get_source_details(source.original_url, runner_opts, addl_opts) do
+      {:ok, %{filepath: filepath}} ->
+        case MetadataFileHelpers.series_directory_from_media_filepath(filepath) do
+          {:ok, series_directory} -> {:ok, series_directory}
+          {:error, _} -> {:ok, nil}
+        end
+
+      err ->
+        err
     end
   end
 
