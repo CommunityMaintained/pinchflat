@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.3.1](https://github.com/CommunityMaintained/pinchflat/compare/v1.3.0...v1.3.1) (2026-07-02)
+
+
+### Bug Fixes
+
+* correct static Size values in sources table on re-sort ([a876bcd](https://github.com/CommunityMaintained/pinchflat/commit/a876bcd817847a87e44bbbc9f50b366202186b0a)), closes [#112](https://github.com/CommunityMaintained/pinchflat/issues/112)
+* label binary byte sizes with IEC units eg. KiB/MiB/GiB ([47fde1f](https://github.com/CommunityMaintained/pinchflat/commit/47fde1f81a992d4b0c8d7634a4c11ba6075330a1))
+
+
+### Chores
+
+* **ci:** fetch sqlean extensions at build time instead of vendoring ([053064b](https://github.com/CommunityMaintained/pinchflat/commit/053064b8d6abe262a96131715240020da92f2600))
+* **deps:** update actions/cache action to v6 ([271b43b](https://github.com/CommunityMaintained/pinchflat/commit/271b43b1de7de7926c7c78636ca590e802d00d80))
+
+
+### Documentation
+
+* clarify metadata/NFO toggle labels in media profile form ([7680d06](https://github.com/CommunityMaintained/pinchflat/commit/7680d065ddd5ccb66adf49d03c3a86580110fcb6))
+
 ## [1.3.0](https://github.com/CommunityMaintained/pinchflat/compare/v1.2.0...v1.3.0) (2026-06-30)
 
 
