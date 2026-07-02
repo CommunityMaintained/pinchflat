@@ -6,6 +6,8 @@ defmodule Pinchflat.Sources do
   import Ecto.Query, warn: false
   use Pinchflat.Media.MediaQuery
 
+  require Logger
+
   alias Pinchflat.Repo
   alias Pinchflat.Media
   alias Pinchflat.Tasks
@@ -15,6 +17,7 @@ defmodule Pinchflat.Sources do
   alias Pinchflat.Metadata.SourceMetadata
   alias Pinchflat.Utils.FilesystemUtils
   alias Pinchflat.Downloading.DownloadingHelpers
+  alias Pinchflat.Downloading.DownloadOptionBuilder
   alias Pinchflat.SlowIndexing.SlowIndexingHelpers
   alias Pinchflat.FastIndexing.FastIndexingHelpers
   alias Pinchflat.Metadata.SourceMetadataStorageWorker
@@ -258,6 +261,8 @@ defmodule Pinchflat.Sources do
 
     case Repo.insert_or_update(changeset) do
       {:ok, %Source{} = source} ->
+        ensure_output_directory_exists(source)
+
         if run_post_commit_tasks do
           maybe_handle_media_tasks(changeset, source)
           maybe_run_indexing_task(changeset, source)
@@ -268,6 +273,35 @@ defmodule Pinchflat.Sources do
 
       err ->
         err
+    end
+  end
+
+  # Creates the static portion of the source's output directory as soon as the source is
+  # saved. yt-dlp auto-creates directories when actually downloading, but indexing runs with
+  # `--simulate` where it does NOT, so a not-yet-existent custom output path would otherwise
+  # only be created on the first successful download. Doing it here means indexing has a
+  # directory to work with immediately.
+  #
+  # Only the leading path segments that don't contain per-video yt-dlp tokens (`%(...)`) can
+  # be resolved at this point - the rest is left for yt-dlp to create at download time.
+  defp ensure_output_directory_exists(source) do
+    dir =
+      source
+      |> DownloadOptionBuilder.build_output_path_for()
+      |> Path.dirname()
+      |> String.split("/")
+      |> Enum.take_while(fn segment -> not String.contains?(segment, "%(") end)
+      |> Enum.join("/")
+
+    case dir do
+      "" ->
+        :ok
+
+      dir ->
+        case File.mkdir_p(dir) do
+          :ok -> :ok
+          {:error, reason} -> Logger.warning("Could not create output directory #{dir}: #{inspect(reason)}")
+        end
     end
   end
 

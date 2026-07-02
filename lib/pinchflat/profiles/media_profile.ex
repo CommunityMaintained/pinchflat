@@ -84,8 +84,23 @@ defmodule Pinchflat.Profiles.MediaProfile do
     |> validate_required(@required_fields)
     # Ensures it ends with `.{{ ext }}` or `.%(ext)s` or similar (with a little wiggle room)
     |> validate_format(:output_path_template, ext_regex(), message: "must end with .{{ ext }}")
+    # Prevents the output path from escaping the media directory via `..`
+    |> validate_no_path_traversal(:output_path_template)
     |> validate_number(:redownload_delay_days, greater_than_or_equal_to: 0)
     |> unique_constraint(:name)
+  end
+
+  # `..` would let a custom template resolve to a path outside the media directory,
+  # which yt-dlp won't create during indexing (`--simulate`) and which escapes the
+  # directories Pinchflat manages. Reject it outright.
+  defp validate_no_path_traversal(changeset, field) do
+    validate_change(changeset, field, fn ^field, value ->
+      if is_binary(value) and String.contains?(value, "..") do
+        [{field, "cannot contain '..' (parent directory traversal)"}]
+      else
+        []
+      end
+    end)
   end
 
   @doc false

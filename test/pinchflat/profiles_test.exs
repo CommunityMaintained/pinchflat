@@ -182,5 +182,16 @@ defmodule Pinchflat.ProfilesTest do
         refute cs.valid?
       end
     end
+
+    test "it does not allow output templates with parent directory traversal" do
+      cs =
+        Profiles.change_media_profile(%MediaProfile{}, %{
+          name: "a",
+          output_path_template: "../escape/{{ id }}.{{ ext }}"
+        })
+
+      refute cs.valid?
+      assert "cannot contain '..' (parent directory traversal)" in errors_on(cs).output_path_template
+    end
   end
 end

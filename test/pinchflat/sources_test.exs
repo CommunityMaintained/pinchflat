@@ -302,6 +302,35 @@ defmodule Pinchflat.SourcesTest do
       assert {:error, %Ecto.Changeset{}} = Sources.create_source(@invalid_source_attrs)
     end
 
+    test "rejects an output path override that escapes the media directory via '..'" do
+      expect(YtDlpRunnerMock, :run, 0, &channel_mock/5)
+
+      valid_attrs = %{
+        media_profile_id: media_profile_fixture().id,
+        original_url: "https://www.youtube.com/channel/abc123",
+        output_path_template_override: "../escape/{{ title }}.{{ ext }}"
+      }
+
+      assert {:error, %Ecto.Changeset{} = changeset} = Sources.create_source(valid_attrs)
+      assert "cannot contain '..' (parent directory traversal)" in errors_on(changeset).output_path_template_override
+    end
+
+    test "creates the static portion of the source's output directory" do
+      expect(YtDlpRunnerMock, :run, &channel_mock/5)
+
+      valid_attrs = %{
+        media_profile_id: media_profile_fixture().id,
+        original_url: "https://www.youtube.com/channel/abc123",
+        output_path_template_override: "nested/subdir/{{ title }}.{{ ext }}"
+      }
+
+      expected_dir = Path.join([Application.get_env(:pinchflat, :media_directory), "nested", "subdir"])
+      refute File.dir?(expected_dir)
+
+      assert {:ok, %Source{}} = Sources.create_source(valid_attrs)
+      assert File.dir?(expected_dir)
+    end
+
     test "creation with invalid data fails fast and does not call the runner" do
       expect(YtDlpRunnerMock, :run, 0, &channel_mock/5)
 

@@ -129,6 +129,8 @@ defmodule Pinchflat.Sources.Source do
     |> validate_number(:retention_period_days, greater_than_or_equal_to: 0)
     # Ensures it ends with `.{{ ext }}` or `.%(ext)s` or similar (with a little wiggle room)
     |> validate_format(:output_path_template_override, MediaProfile.ext_regex(), message: "must end with .{{ ext }}")
+    # Prevents the output path from escaping the media directory via `..`
+    |> validate_no_path_traversal(:output_path_template_override)
     |> validate_format(:original_url, youtube_channel_or_playlist_regex(), message: "must be a channel or playlist URL")
     |> cast_assoc(:metadata, with: &SourceMetadata.changeset/2, required: false)
     |> unique_constraint([:collection_id, :media_profile_id, :title_filter_regex], error_key: :original_url)
@@ -171,6 +173,19 @@ defmodule Pinchflat.Sources.Source do
   end
 
   defp validate_title_regex(changeset), do: changeset
+
+  # `..` would let a custom template resolve to a path outside the media directory,
+  # which yt-dlp won't create during indexing (`--simulate`) and which escapes the
+  # directories Pinchflat manages. Reject it outright.
+  defp validate_no_path_traversal(changeset, field) do
+    validate_change(changeset, field, fn ^field, value ->
+      if is_binary(value) and String.contains?(value, "..") do
+        [{field, "cannot contain '..' (parent directory traversal)"}]
+      else
+        []
+      end
+    end)
+  end
 
   defp validate_min_and_max_durations(changeset) do
     min_duration = get_change(changeset, :min_duration_seconds)
