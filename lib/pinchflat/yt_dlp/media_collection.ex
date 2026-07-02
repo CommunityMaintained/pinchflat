@@ -4,6 +4,8 @@ defmodule Pinchflat.YtDlp.MediaCollection do
   media (aka: a source [ie: channels, playlists]).
   """
 
+  require Logger
+
   alias Pinchflat.Utils.FilesystemUtils
   alias Pinchflat.YtDlp.Media, as: YtDlpMedia
 
@@ -83,11 +85,8 @@ defmodule Pinchflat.YtDlp.MediaCollection do
     action = :get_source_details
 
     with {:ok, output} <- backend_runner().run(source_url, action, all_command_opts, output_template, addl_opts),
-         {:ok, parsed_json} <- Phoenix.json_library().decode(output) do
+         {:ok, parsed_json} <- decode_response(output, action) do
       {:ok, format_source_details(parsed_json)}
-    else
-      {:error, %Jason.DecodeError{}} -> {:error, "Error decoding JSON response"}
-      err -> err
     end
   end
 
@@ -123,10 +122,29 @@ defmodule Pinchflat.YtDlp.MediaCollection do
     action = :get_source_metadata
 
     with {:ok, output} <- backend_runner().run(source_url, action, all_command_opts, output_template, addl_opts),
-         {:ok, parsed_json} <- Phoenix.json_library().decode(output) do
+         {:ok, parsed_json} <- decode_response(output, action) do
       {:ok, parsed_json}
-    else
-      err -> err
+    end
+  end
+
+  # yt-dlp writes its `--print`/`--print-to-file` template to a file that we read back and
+  # expect to be a single JSON document. An empty or truncated response - an extractor change,
+  # a geo-block, an empty/unavailable collection, or a yt-dlp behaviour change - fails to
+  # decode. Log the raw yt-dlp response so the underlying cause is diagnosable, then return a
+  # clean error tuple instead of a bare Jason.DecodeError (which callers would otherwise
+  # crash on via a strict `{:ok, _} =` match).
+  defp decode_response(output, action) do
+    case Phoenix.json_library().decode(output) do
+      {:ok, parsed_json} ->
+        {:ok, parsed_json}
+
+      {:error, decode_error} ->
+        Logger.error(
+          "yt-dlp #{action} returned an unparseable response (#{byte_size(output)} bytes): " <>
+            "#{inspect(Exception.message(decode_error))}. Raw response: #{inspect(String.slice(output, 0, 500))}"
+        )
+
+        {:error, "Error decoding JSON response"}
     end
   end
 
