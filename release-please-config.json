@@ -28,6 +28,10 @@
       "section": "Chores"
     },
     {
+      "type": "doc",
+      "section": "Documentation"
+    },
+    {
       "type": "docs",
       "section": "Documentation"
     },
