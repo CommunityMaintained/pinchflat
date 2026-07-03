@@ -1,8 +1,8 @@
-> [!WARNING]
-> This is a community-maintained fork of [kieraneglin/pinchflat](https://github.com/kieraneglin/pinchflat). The original project is not actively maintained; this fork exists to continue development and apply community contributions. Docker images are published to `ghcr.io/communitymaintained/pinchflat`. See [Migrating from kieraneglin/pinchflat](#migrating-from-kieraneglinpinchflat). PR welcome - see [CONTRIBUTING.md](CONTRIBUTING.md).
+> [!TIP]
+> This is a community-maintained fork of [kieraneglin/pinchflat](https://github.com/kieraneglin/pinchflat). The original project is not actively maintained; this fork exists to continue development and apply community contributions. Docker images are published to `ghcr.io/communitymaintained/pinchflat`. See [Migrating from kieraneglin/pinchflat](#migrating-from-kieraneglinpinchflat). PRs welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 > [!IMPORTANT]
-> (2025-02-14) [zakkarry](https://github.com/sponsors/zakkarry), who is a collaborator on [cross-seed](https://github.com/cross-seed/cross-seed) and an extremely helpful community member in general, is facing hard times due to medical debt and family illness. If you're able, please consider [sponsoring him on GitHub](https://github.com/sponsors/zakkarry) or donating via [buymeacoffee](https://tip.ary.dev). Tell him I sent you!
+> **Volunteers needed:** I started this GitHub org with the intent of providing life support to valuable but unmaintained open-source projects, hoping we could build a small community around it. Pinchflat is Elixir/Phoenix, so that's directly useful here, but the org's needs go beyond any one stack — Docker/GHCR image publishing, GitHub Actions/CI maintenance, release management, issue triage, and documentation all help regardless of what project we take on next. If you're interested in joining or bringing another project in, let me know what you'd like to work on and any relevant experience you have.
 
 <p align="center">
   <img
@@ -22,9 +22,7 @@
 
 [![](https://img.shields.io/github/license/CommunityMaintained/pinchflat?style=for-the-badge&color=ee512b)](LICENSE)
 [![](https://img.shields.io/github/v/release/CommunityMaintained/pinchflat?style=for-the-badge&color=purple)](https://github.com/CommunityMaintained/pinchflat/releases)
-[![](https://img.shields.io/static/v1?style=for-the-badge&logo=discord&message=Chat&color=5865F2&label=Discord)](https://discord.gg/j7T6dCuwU4)
-[![](https://img.shields.io/github/actions/workflow/status/CommunityMaintained/pinchflat/lint_and_test.yml?style=for-the-badge)](#)
-[![](https://img.shields.io/static/v1?label=Dev%20Containers&message=Open&color=blue&logo=visualstudiocode&style=for-the-badge)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/CommunityMaintained/pinchflat)
+[![](https://img.shields.io/github/actions/workflow/status/CommunityMaintained/pinchflat/release-please.yml?style=for-the-badge)](https://github.com/CommunityMaintained/pinchflat/actions/workflows/release-please.yml)
 
 </div>
 
@@ -54,7 +52,7 @@
 
 ## What it does
 
-Pinchflat is a self-hosted app for downloading YouTube content built using [yt-dlp](https://github.com/yt-dlp/yt-dlp). It's designed to be lightweight, self-contained, and easy to use. You set up rules for how to download content from YouTube channels or playlists and it'll do the rest, periodically checking for new content. It's perfect for people who want to download content for use in with a media center app (Plex, Jellyfin, Kodi) or for those who want to archive media!
+Pinchflat is a self-hosted app for downloading YouTube content built using [yt-dlp](https://github.com/yt-dlp/yt-dlp). It's designed to be lightweight, self-contained, and easy to use. You set up rules for how to download content from YouTube channels or playlists and it'll do the rest, periodically checking for new content. It's perfect for people who want to download content for use with a media center app (Plex, Jellyfin, Kodi) or for those who want to archive media!
 
 While you can [download individual videos](https://github.com/CommunityMaintained/pinchflat/wiki/Frequently-Asked-Questions#how-do-i-download-one-off-videos), Pinchflat is best suited for downloading content from channels or playlists. It's also not meant for consuming content in-app - Pinchflat downloads content to disk where you can then watch it with a media center app or VLC.
 
@@ -81,7 +79,7 @@ If it doesn't work for your use case, please make a feature request! You can als
 - Sponsorblock integration
 - \[Advanced\] control how `yt-dlp` updates from Settings - track stable or nightly, pin an exact version, or temporarily ride nightly and auto-return to stable once the fix lands there
 - \[Advanced\] allows custom `yt-dlp` options ([docs](https://github.com/CommunityMaintained/pinchflat/wiki/%5BAdvanced%5D-Custom-yt%E2%80%90dlp-options))
-- \[Advanced\] supports running custom scripts when after downloading/deleting media (alpha - [docs](https://github.com/CommunityMaintained/pinchflat/wiki/%5BAdvanced%5D-Custom-lifecycle-scripts))
+- \[Advanced\] supports running custom scripts after downloading/deleting media (alpha - [docs](https://github.com/CommunityMaintained/pinchflat/wiki/%5BAdvanced%5D-Custom-lifecycle-scripts))
 
 ## Screenshots
 
@@ -92,7 +90,9 @@ If it doesn't work for your use case, please make a feature request! You can als
 
 ### Unraid
 
-Simply search for Pinchflat in the Community Apps store!
+~~Simply search for Pinchflat in the Community Apps store!~~
+
+- Currently unavailable.
 
 ### Portainer
 
@@ -104,7 +104,7 @@ Docker Compose file:
 ```yaml
 services:
   pinchflat:
-    image: ghcr.io/kieraneglin/pinchflat:latest
+    image: ghcr.io/communitymaintained/pinchflat:latest
     environment:
       # Set the timezone to your local timezone
       - TZ=America/New_York
@@ -171,20 +171,20 @@ If you change this setting and it works well for you, please open an issue or le
 
 ### Environment variables
 
-| Name                        | Required? | Default                   | Notes                                                                                                                                             |
-| --------------------------- | --------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `TZ`                        | No        | `UTC`                     | Must follow IANA TZ format                                                                                                                        |
-| `LOG_LEVEL`                 | No        | `debug`                   | Can be set to `info` but `debug` is strongly recommended                                                                                          |
-| `UMASK`                     | No        | `022`                     | Unraid users may want to set this to `000`                                                                                                        |
-| `BASIC_AUTH_USERNAME`       | No        |                           | See [authentication docs](https://github.com/CommunityMaintained/pinchflat/wiki/Username-and-Password)                                            |
-| `BASIC_AUTH_PASSWORD`       | No        |                           | See [authentication docs](https://github.com/CommunityMaintained/pinchflat/wiki/Username-and-Password)                                            |
-| `EXPOSE_FEED_ENDPOINTS`     | No        | `false`                   | See [RSS feed docs](https://github.com/CommunityMaintained/pinchflat/wiki/Podcast-RSS-Feeds)                                                      |
-| `ENABLE_IPV6`               | No        | `false`                   | Setting to _any_ non-blank value will enable IPv6                                                                                                 |
-| `JOURNAL_MODE`              | No        | `wal`                     | Set to `delete` if your config directory is stored on a network share (not recommended)                                                           |
-| `TZ_DATA_DIR`               | No        | `/etc/elixir_tzdata_data` | The container path where the timezone database is stored                                                                                          |
-| `BASE_ROUTE_PATH`           | No        | `/`                       | The base path for route generation. Useful when running behind certain reverse proxies - prefixes must be stripped.                               |
-| `YT_DLP_WORKER_CONCURRENCY` | No        | `2`                       | The number of concurrent workers that use `yt-dlp` _per queue_. Set to 1 if you're getting IP limited, otherwise don't touch it                   |
-| `ENABLE_PROMETHEUS`         | No        | `false`                   | Setting to _any_ non-blank value will enable Prometheus. See [docs](https://github.com/CommunityMaintained/pinchflat/wiki/Prometheus-and-Grafana) |
+| Name                        | Required? | Default                        | Notes                                                                                                                                             |
+| --------------------------- | --------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `TZ`                        | No        | `UTC`                          | Must follow IANA TZ format                                                                                                                        |
+| `LOG_LEVEL`                 | No        | `debug`                        | Can be set to `info` but `debug` is strongly recommended                                                                                          |
+| `UMASK`                     | No        | `022`                          | Unraid users may want to set this to `000`                                                                                                        |
+| `BASIC_AUTH_USERNAME`       | No        |                                | See [authentication docs](https://github.com/CommunityMaintained/pinchflat/wiki/Username-and-Password)                                            |
+| `BASIC_AUTH_PASSWORD`       | No        |                                | See [authentication docs](https://github.com/CommunityMaintained/pinchflat/wiki/Username-and-Password)                                            |
+| `EXPOSE_FEED_ENDPOINTS`     | No        | `false`                        | See [RSS feed docs](https://github.com/CommunityMaintained/pinchflat/wiki/Podcast-RSS-Feeds)                                                      |
+| `ENABLE_IPV6`               | No        | `false`                        | Setting to _any_ non-blank value will enable IPv6                                                                                                 |
+| `JOURNAL_MODE`              | No        | `wal`                          | Set to `delete` if your config directory is stored on a network share (not recommended)                                                           |
+| `TZ_DATA_PATH`              | No        | `<EXTRAS_PATH>/elixir_tz_data` | The container path where the timezone database is stored                                                                                          |
+| `BASE_ROUTE_PATH`           | No        | `/`                            | The base path for route generation. Useful when running behind certain reverse proxies - prefixes must be stripped.                               |
+| `YT_DLP_WORKER_CONCURRENCY` | No        | `2`                            | The number of concurrent workers that use `yt-dlp` _per queue_. Set to 1 if you're getting IP limited, otherwise don't touch it                   |
+| `ENABLE_PROMETHEUS`         | No        | `false`                        | Setting to _any_ non-blank value will enable Prometheus. See [docs](https://github.com/CommunityMaintained/pinchflat/wiki/Prometheus-and-Grafana) |
 
 ### Reverse Proxies
 
