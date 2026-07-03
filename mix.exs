@@ -78,10 +78,7 @@ defmodule Pinchflat.MixProject do
       {:credo, "~> 1.7.7", only: [:dev, :test], runtime: false},
       {:credo_naming, "~> 2.1", only: [:dev, :test], runtime: false},
       {:ex_check, "~> 0.16.0", only: [:dev, :test], runtime: false},
-      # See https://github.com/elixirs/faker/pull/642 and https://github.com/elixirs/faker/issues/639
-      # {:faker, "~> 0.17", only: :test},
-      {:faker,
-       git: "https://github.com/OnetoOneHealth/faker.git", ref: "df3d9012933650cd685787e3bad3fbb94b379acd", only: :test},
+      {:faker, "~> 0.19", only: :test},
       {:sobelow, "~> 0.14", only: [:dev, :test], runtime: false}
     ]
   end
