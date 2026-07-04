@@ -25,8 +25,15 @@
     {@inner_content}
 
     <.donate_modal conn={@conn} />
-    <template x-if="!proEnabled && !onboarding">
-      <.upgrade_modal conn={@conn} />
-    </template>
+    <%!--
+      Rendered unconditionally (NOT inside an `x-if`) so its nested LiveView
+      (`UpgradeButtonLive`) exists in the DOM when `liveSocket.connect()` scans
+      for views to join. Gating it behind Alpine's `x-if` meant the modal was
+      cloned into the DOM after connect on some environments, so the nested
+      LiveView never joined — leaving the "Unlock Pro" button permanently
+      disabled (issue #125). Visibility is handled by show_modal/hide_modal; the
+      pro triggers only open it while `!proEnabled && !onboarding`.
+    --%>
+    <.upgrade_modal conn={@conn} />
   </body>
 </html>

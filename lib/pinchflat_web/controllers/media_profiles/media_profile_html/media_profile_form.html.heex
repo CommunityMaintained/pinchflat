@@ -257,7 +257,8 @@
     </p>
 
     <section
-      phx-click={show_modal("upgrade-modal")}
+      data-show-upgrade-modal={show_modal("upgrade-modal")}
+      x-on:click="(!proEnabled && !onboarding) && window.liveSocket.execJS($el, $el.dataset.showUpgradeModal)"
       x-data="{ presets: { default: false, media_center: true, audio: false, archiving: false } }"
     >
       <.input

@@ -59,7 +59,10 @@
         help="Indexing is the process of checking for media to download. For best results, set this to the longest delay you can tolerate for this source"
       />
 
-      <div phx-click={show_modal("upgrade-modal")}>
+      <div
+        data-show-upgrade-modal={show_modal("upgrade-modal")}
+        x-on:click="(!proEnabled && !onboarding) && window.liveSocket.execJS($el, $el.dataset.showUpgradeModal)"
+      >
         <.input
           field={f[:fast_index]}
           type="toggle"
