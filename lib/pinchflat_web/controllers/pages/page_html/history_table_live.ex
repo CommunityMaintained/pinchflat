@@ -69,11 +69,19 @@ defmodule Pinchflat.Pages.HistoryTableLive do
   end
 
   def mount(_params, session, socket) do
+    if connected?(socket), do: PinchflatWeb.Endpoint.subscribe("job:state")
+
     page = 1
     base_query = generate_base_query(session["media_state"])
     pagination_attrs = fetch_pagination_attributes(base_query, page)
 
     {:ok, assign(socket, Map.merge(pagination_attrs, %{base_query: base_query}))}
+  end
+
+  def handle_info(%{topic: "job:state", event: "change"}, %{assigns: assigns} = socket) do
+    new_assigns = fetch_pagination_attributes(assigns.base_query, assigns.page)
+
+    {:noreply, assign(socket, new_assigns)}
   end
 
   def handle_event("page_change", %{"direction" => direction}, %{assigns: assigns} = socket) do
