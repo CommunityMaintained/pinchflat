@@ -2,6 +2,7 @@ defmodule PinchflatWeb.Sources.SourceLive.IndexTableLiveTest do
   use PinchflatWeb.ConnCase
 
   import Phoenix.LiveViewTest
+  import Pinchflat.MediaFixtures
   import Pinchflat.SourcesFixtures
   import Pinchflat.ProfilesFixtures
 
@@ -32,6 +33,28 @@ defmodule PinchflatWeb.Sources.SourceLive.IndexTableLiveTest do
       {:ok, _view, html} = live_isolated(conn, IndexTableLive, session: create_session())
 
       refute html =~ source.custom_name
+    end
+
+    test "shows the pending count for sources with no downloaded media", %{conn: conn} do
+      source = source_fixture()
+      media_item_fixture(%{source_id: source.id, media_filepath: nil})
+      media_item_fixture(%{source_id: source.id, media_filepath: nil})
+
+      {:ok, view, _html} = live_isolated(conn, IndexTableLive, session: create_session())
+
+      assert cell_text(view, "tbody tr:first-child td:nth-of-type(2)") == "2"
+      assert cell_text(view, "tbody tr:first-child td:nth-of-type(3)") == "0"
+    end
+
+    test "shows pending and downloaded counts for sources with downloaded media", %{conn: conn} do
+      source = source_fixture()
+      media_item_fixture(%{source_id: source.id, media_filepath: nil})
+      media_item_fixture(%{source_id: source.id})
+
+      {:ok, view, _html} = live_isolated(conn, IndexTableLive, session: create_session())
+
+      assert cell_text(view, "tbody tr:first-child td:nth-of-type(2)") == "1"
+      assert cell_text(view, "tbody tr:first-child td:nth-of-type(3)") == "1"
     end
   end
 
@@ -128,6 +151,14 @@ defmodule PinchflatWeb.Sources.SourceLive.IndexTableLiveTest do
     view
     |> element(selector)
     |> render()
+  end
+
+  defp cell_text(view, selector) do
+    view
+    |> render_element(selector)
+    |> LazyHTML.from_fragment()
+    |> LazyHTML.text()
+    |> String.trim()
   end
 
   defp create_session do
