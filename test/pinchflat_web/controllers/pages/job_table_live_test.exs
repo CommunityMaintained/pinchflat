@@ -71,13 +71,16 @@ defmodule PinchflatWeb.Pages.JobTableLiveTest do
       assert html =~ ~p"/sources/#{source.id}"
     end
 
-    test "listens for job:state change events", %{conn: conn} do
+    test "reloads the table on job:state change events", %{conn: conn} do
       {_source, _media_item, _task, _job} = create_media_item_job()
-      {:ok, _view, _html} = live_isolated(conn, JobTableLive, session: %{})
+      {:ok, view, _html} = live_isolated(conn, JobTableLive, session: %{})
+
+      {_source, new_media_item, _task, _job} = create_media_item_job()
+      refute render(view) =~ new_media_item.title
 
       PinchflatWeb.Endpoint.broadcast("job:state", "change", nil)
 
-      assert_receive %Phoenix.Socket.Broadcast{topic: "job:state", event: "change", payload: nil}
+      assert render(view) =~ new_media_item.title
     end
   end
 
