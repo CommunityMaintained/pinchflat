@@ -30,7 +30,9 @@ defmodule Pinchflat.Downloading.MediaRetentionWorkerTest do
 
       refute Repo.reload!(new_media_item).culled_at
       assert Repo.reload!(old_media_item).culled_at
-      assert DateTime.diff(now(), Repo.reload!(old_media_item).culled_at) < 1
+      # culled_at is truncated to whole seconds, so the diff can be exactly 1
+      # when the second ticks over between the cull and this assertion
+      assert DateTime.diff(now(), Repo.reload!(old_media_item).culled_at) <= 1
     end
   end
 
