@@ -96,7 +96,7 @@
 | Sobelow              | dev/test  | Security vulnerability scanner                                 |
 | ex_check             | dev/test  | Unified check runner (`mix check`) — orchestrates all tools    |
 | Mox                  | test      | Mock library for behaviour-based test doubles                  |
-| Floki                | test      | HTML parser for controller/LiveView test assertions            |
+| LazyHTML             | test      | HTML parser for controller/LiveView test assertions            |
 | Faker                | test      | Fake data generation in test fixtures                          |
 | Prettier             | dev/CI    | Formatter for JS, CSS, JSON, YAML, Markdown                    |
 | sqleton              | local dev | ERD generation from the live SQLite DB (`yarn run create-erd`) |

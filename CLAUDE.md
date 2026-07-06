@@ -120,8 +120,8 @@ Pinchflat uses two indexing strategies:
 
 `lib/pinchflat/boot/` has three GenServers run at startup:
 
-- `PreJobStartupTasks` — runs before Oban starts (DB cleanup, etc.)
-- `PostJobStartupTasks` — runs after Oban starts (reschedules stalled jobs)
+- `PreJobStartupTasks` — runs before Oban starts: resets stuck `executing` jobs to `retryable`, ensures the tmpfile directory and blank cookie/yt-dlp-config/user-script files exist, records the installed yt-dlp/Apprise versions, and runs the `app_init` user script
+- `PostJobStartupTasks` — runs after Oban starts: re-kicks any missing indexing job chains. Slow/fast indexing jobs are self-perpetuating (each run schedules its successor), so if a job exhausts its retries and is discarded the chain dies — this reconciliation revives it on the next boot without double-scheduling live chains
 - `PostBootStartupTasks` — runs once everything is ready (triggers yt-dlp self-update)
 
 All three use `restart: :temporary` so they run once and exit cleanly.
