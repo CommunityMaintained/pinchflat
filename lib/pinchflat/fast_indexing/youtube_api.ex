@@ -133,7 +133,9 @@ defmodule Pinchflat.FastIndexing.YoutubeApi do
             {current, rem(current + 1, length(keys))}
           end)
 
-        Logger.debug("Using YouTube API key: #{Enum.at(keys, current_index)}")
+        # Only log the key's position - the raw key must stay out of the logs
+        # since they're written to disk and downloadable from the settings UI
+        Logger.debug("Using YouTube API key ##{current_index + 1} of #{length(keys)}")
         Enum.at(keys, current_index)
     end
   end
