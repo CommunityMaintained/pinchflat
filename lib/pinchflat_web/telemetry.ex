@@ -21,7 +21,9 @@ defmodule PinchflatWeb.Telemetry do
 
   @doc false
   def job_state_change_broadcast(_event, _measure, _meta, _config) do
-    PinchflatWeb.Endpoint.broadcast("job:state", "change", nil)
+    # Routed through the throttle so a burst of job events produces a single
+    # broadcast instead of one dashboard refresh per event
+    PinchflatWeb.JobStateThrottle.notify()
   end
 
   def metrics do

@@ -38,7 +38,7 @@ defmodule Pinchflat.Pages.JobTableLive do
   end
 
   def mount(_params, _session, socket) do
-    PinchflatWeb.Endpoint.subscribe("job:state")
+    if connected?(socket), do: PinchflatWeb.Endpoint.subscribe("job:state")
 
     {:ok, assign(socket, tasks: get_tasks())}
   end
