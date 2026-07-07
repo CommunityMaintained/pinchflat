@@ -5,6 +5,7 @@ defmodule Pinchflat.YtDlp.MediaCollection do
   """
 
   alias Pinchflat.Utils.FilesystemUtils
+  alias Pinchflat.Utils.UrlNormalizer
   alias Pinchflat.YtDlp.ResponseDecoder
   alias Pinchflat.YtDlp.Media, as: YtDlpMedia
 
@@ -24,6 +25,9 @@ defmodule Pinchflat.YtDlp.MediaCollection do
   Returns {:ok, [map()]} | {:error, any, ...}.
   """
   def get_media_attributes_for_collection(url, command_opts \\ [], addl_opts \\ []) do
+    # Normalize the URL to handle video URLs with playlist parameters
+    normalized_url = UrlNormalizer.normalize_url(url)
+    
     # `ignore_no_formats_error` is necessary because yt-dlp will error out if
     # the first video has not released yet (ie: is a premier). We don't care about
     # available formats since we're just getting the media details
@@ -43,7 +47,7 @@ defmodule Pinchflat.YtDlp.MediaCollection do
       file_listener_handler.(output_filepath)
     end
 
-    case backend_runner().run(url, action, all_command_opts, output_template, runner_opts) do
+    case backend_runner().run(normalized_url, action, all_command_opts, output_template, runner_opts) do
       {:ok, output} ->
         parsed_lines =
           output
@@ -75,6 +79,9 @@ defmodule Pinchflat.YtDlp.MediaCollection do
   Returns {:ok, map()} | {:error, any, ...}.
   """
   def get_source_details(source_url, command_opts \\ [], addl_opts \\ []) do
+    # Normalize the URL to handle video URLs with playlist parameters
+    normalized_url = UrlNormalizer.normalize_url(source_url)
+    
     # `ignore_no_formats_error` is necessary because yt-dlp will error out if
     # the first video has not released yet (ie: is a premier). We don't care about
     # available formats since we're just getting the source details
@@ -89,7 +96,7 @@ defmodule Pinchflat.YtDlp.MediaCollection do
     output_template = "%(.{channel,channel_id,playlist_id,playlist_title,filename})j"
     action = :get_source_details
 
-    with {:ok, output} <- backend_runner().run(source_url, action, all_command_opts, output_template, addl_opts),
+    with {:ok, output} <- backend_runner().run(normalized_url, action, all_command_opts, output_template, addl_opts),
          {:ok, parsed_json} <- ResponseDecoder.decode(output, action) do
       {:ok, format_source_details(parsed_json)}
     end
@@ -119,6 +126,9 @@ defmodule Pinchflat.YtDlp.MediaCollection do
   Returns {:ok, map()} | {:error, any, ...}.
   """
   def get_source_metadata(source_url, command_opts, addl_opts \\ []) do
+    # Normalize the URL to handle video URLs with playlist parameters
+    normalized_url = UrlNormalizer.normalize_url(source_url)
+    
     # This only validates that the `playlist_items` key is present. It's otherwise unused
     _playlist_items = Keyword.fetch!(command_opts, :playlist_items)
 
@@ -126,7 +136,7 @@ defmodule Pinchflat.YtDlp.MediaCollection do
     output_template = "playlist:%()j"
     action = :get_source_metadata
 
-    with {:ok, output} <- backend_runner().run(source_url, action, all_command_opts, output_template, addl_opts) do
+    with {:ok, output} <- backend_runner().run(normalized_url, action, all_command_opts, output_template, addl_opts) do
       ResponseDecoder.decode(output, action)
     end
   end
