@@ -107,7 +107,7 @@ Key workers:
 - `lib/pinchflat/podcasts/` — builds podcast RSS and OPML feeds so Sources can be consumed by podcast apps.
 - `lib/pinchflat/lifecycle/` — side effects around media lifecycle: Apprise `notifications` and user-defined `user_scripts` run via command runners.
 - `lib/pinchflat/http/` — small HTTP client behaviour (`http_behaviour.ex` / `http_client.ex`) for RSS fetches and similar, mockable in tests.
-- `lib/pinchflat/diagnostics/` — `QueueDiagnostics` powers the Oban queue diagnostics page in the UI. Each queue card on the page can be expanded to list the jobs currently in that queue (capped at 50, via `get_jobs_for_queue/2`). Discarded jobs can be reset or permanently deleted (`delete_discarded_job/1`), and a "Details" column resolves each job's args to the Source/MediaItem/MediaProfile it targets (`describe_job/2`).
+- `lib/pinchflat/diagnostics/` — `QueueDiagnostics` powers the Oban queue diagnostics page in the UI. Each queue card on the page can be expanded to list the jobs currently in that queue (capped at 50, via `get_jobs_for_queue/2`). Discarded jobs can be reset or permanently deleted (`delete_discarded_job/1`), and a "Details" column resolves each job's args to the Source/MediaItem/MediaProfile it targets (`describe_job/2`). Long-running (executing) and retryable jobs can be **requeued** (`requeue_job/1`) rather than cancelled outright: this cancels the current run (killing its yt-dlp process if executing) and enqueues a fresh copy of the same worker + args at the back of the queue, re-linking it to a Task via `Tasks.create_job_with_task/2` when it targets a Source/MediaItem. This replaced a bare cancel that silently dropped the work — important for single-worker setups (`YT_DLP_WORKER_CONCURRENCY=1`) where a long slow-index holds the only slot and the user needs to yield it to other jobs without losing the index.
 
 ### Indexing: fast vs slow
 
@@ -149,6 +149,22 @@ Use [Conventional Commits](https://www.conventionalcommits.org/):
 Only `fix:`, `feat:`, and a `!` / `BREAKING CHANGE:` (major) bump the version. Every type above is recognized by release-please (see the `changelog-sections` in `release-please-config.json`) and is sorted into the changelog accordingly — `test:` and `ci:` are hidden. Prefer `chore(deps):` for dependency bumps; the legacy `deps:` type is also mapped to the Chores section but is being phased out, so don't use it for new commits.
 
 Prefer `chore(ci):` for CI/build-pipeline changes (rather than a bare `ci:`) so they surface in the Chores changelog section instead of being hidden.
+
+### User-facing commits: write the subject for users
+
+When a `fix:` or `feat:` changes something a user can see or feel — UI, download/indexing behaviour, settings, notifications, feeds, anything that shows up in the app or changes how it behaves for them — the subject line (`-m`, the first line) should describe the change in terms of its **user-visible effect**, not the internal mechanics. These subjects flow into the release-please changelog, so someone reading the release notes should understand what changed for them without knowing the code.
+
+- Lead with what the user now experiences (or no longer experiences), not the function/module/refactor that made it happen.
+- Keep the Conventional Commits prefix and scope; only the wording after the colon changes in emphasis.
+- Put the mechanics (which module, why, how) in the commit **body**, not the subject.
+
+Examples:
+
+- Prefer `fix: correct pending count for sources with no downloaded media` over `fix: adjust MediaQuery pending clause for null download states`.
+- Prefer `feat: let sources skip livestreams still in progress` over `feat: add live_status check to indexing filter`.
+- Prefer `fix: stop re-downloading videos after a title change` over `fix: use media_id instead of title in download archive`.
+
+For non-user-facing types (`chore`, `refactor`, `test`, `ci`, internal `perf`, etc.), keep writing the subject in normal developer terms — there's no user effect to lead with.
 
 While iterating on a change, run the relevant tests with `tooling/test.sh <path>`
 (see the Commands section) to get fast feedback without the full check suite.

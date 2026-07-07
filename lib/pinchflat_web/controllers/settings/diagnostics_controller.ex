@@ -32,11 +32,11 @@ defmodule PinchflatWeb.Settings.DiagnosticsController do
     end
   end
 
-  def cancel_job(conn, %{"id" => job_id}) do
+  def requeue_job(conn, %{"id" => job_id}) do
     with {:ok, id} <- parse_job_id(job_id),
-         {:ok, :cancelled} <- QueueDiagnostics.cancel_job(id) do
+         {:ok, :requeued} <- QueueDiagnostics.requeue_job(id) do
       conn
-      |> put_flash(:info, "Job ##{job_id} has been cancelled.")
+      |> put_flash(:info, "Job ##{job_id} was requeued and will run again after other queued jobs.")
       |> redirect(to: ~p"/diagnostics")
     else
       :error ->
@@ -44,7 +44,7 @@ defmodule PinchflatWeb.Settings.DiagnosticsController do
 
       {:error, _reason} ->
         conn
-        |> put_flash(:error, "Job ##{job_id} could not be cancelled.")
+        |> put_flash(:error, "Job ##{job_id} could not be requeued. It may have already completed.")
         |> redirect(to: ~p"/diagnostics")
     end
   end
