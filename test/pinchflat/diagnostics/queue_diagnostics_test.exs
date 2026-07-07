@@ -1,8 +1,10 @@
 defmodule Pinchflat.Diagnostics.QueueDiagnosticsTest do
   use Pinchflat.DataCase
 
+  alias Pinchflat.Tasks
   alias Pinchflat.Diagnostics.QueueDiagnostics
   alias Pinchflat.JobFixtures.TestJobWorker
+  alias Pinchflat.FastIndexing.FastIndexingWorker
 
   import Pinchflat.MediaFixtures
   import Pinchflat.SourcesFixtures
@@ -72,6 +74,42 @@ defmodule Pinchflat.Diagnostics.QueueDiagnosticsTest do
 
     test "returns nil for workers without a resolvable target" do
       assert QueueDiagnostics.describe_job("Pinchflat.YtDlp.UpdateWorker", %{}) == nil
+    end
+  end
+
+  describe "requeue_job/1" do
+    test "cancels the original job and enqueues a fresh copy of it" do
+      {:ok, job} = Oban.insert(TestJobWorker.new(%{"id" => 7}))
+      Repo.update_all(from(j in Oban.Job, where: j.id == ^job.id), set: [state: "executing"])
+
+      assert {:ok, :requeued} = QueueDiagnostics.requeue_job(job.id)
+
+      assert %{state: "cancelled"} = Repo.get(Oban.Job, job.id)
+
+      assert [new_job] = Repo.all(from(j in Oban.Job, where: j.id != ^job.id))
+      assert new_job.args == %{"id" => 7}
+      assert new_job.state == "available"
+    end
+
+    test "re-links the requeued job to a Task when it targets a source" do
+      source = source_fixture()
+      {:ok, job} = Oban.insert(FastIndexingWorker.new(%{"id" => source.id}))
+
+      assert {:ok, :requeued} = QueueDiagnostics.requeue_job(job.id)
+
+      assert [task] = Tasks.list_tasks_for(source, "FastIndexingWorker", [:available, :scheduled])
+      refute task.job_id == job.id
+    end
+
+    test "still requeues when the target record no longer exists" do
+      {:ok, job} = Oban.insert(FastIndexingWorker.new(%{"id" => 999_999}))
+
+      assert {:ok, :requeued} = QueueDiagnostics.requeue_job(job.id)
+      assert %{state: "cancelled"} = Repo.get(Oban.Job, job.id)
+    end
+
+    test "returns an error when the job does not exist" do
+      assert {:error, :not_found} = QueueDiagnostics.requeue_job(-1)
     end
   end
 
