@@ -84,6 +84,7 @@ defmodule Pinchflat.Profiles.MediaProfile do
     |> validate_required(@required_fields)
     # Ensures it ends with `.{{ ext }}` or `.%(ext)s` or similar (with a little wiggle room)
     |> validate_format(:output_path_template, ext_regex(), message: "must end with .{{ ext }}")
+    |> validate_series_root_marker(:output_path_template)
     |> validate_number(:redownload_delay_days, greater_than_or_equal_to: 0)
     |> unique_constraint(:name)
   end
@@ -91,6 +92,43 @@ defmodule Pinchflat.Profiles.MediaProfile do
   @doc false
   def ext_regex do
     ~r/\.({{ ?ext ?}}|%\( ?ext ?\)[sS])$/
+  end
+
+  @doc false
+  def series_root_regex do
+    ~r/{{ ?series_root ?}}/
+  end
+
+  @doc """
+  Validates the placement of the `{{ series_root }}` marker in an output path
+  template. The marker must appear at most once, must be attached to a directory
+  (not the filename), and that directory must contain something besides the
+  marker itself. Shared with `Source` for its output path template override.
+
+  Returns %Ecto.Changeset{}
+  """
+  def validate_series_root_marker(changeset, field) do
+    validate_change(changeset, field, fn ^field, template ->
+      segments = template |> String.split("/") |> Enum.reject(&(&1 == ""))
+      marker_segments = Enum.filter(segments, &String.match?(&1, series_root_regex()))
+
+      cond do
+        marker_segments == [] ->
+          []
+
+        length(Regex.scan(series_root_regex(), template)) > 1 ->
+          [{field, "must only contain {{ series_root }} once"}]
+
+        String.match?(List.last(segments), series_root_regex()) ->
+          [{field, "{{ series_root }} must be attached to a directory, not the filename"}]
+
+        String.trim(Regex.replace(series_root_regex(), hd(marker_segments), "")) == "" ->
+          [{field, "{{ series_root }} must be attached to a directory name, not used on its own"}]
+
+        true ->
+          []
+      end
+    end)
   end
 
   @doc false

@@ -438,6 +438,28 @@ defmodule Pinchflat.Downloading.DownloadOptionBuilderTest do
 
       assert path == "/tmp/test/media/override.%(ext)s"
     end
+
+    test "strips the series_root marker from the output path", %{media_item: media_item} do
+      media_item =
+        update_media_profile_attribute(media_item, %{
+          output_path_template: "{{ source_custom_name }}{{ series_root }}/Videos/{{ title }}.%(ext)s"
+        })
+
+      path = DownloadOptionBuilder.build_output_path_for(media_item)
+
+      assert path == "/tmp/test/media/my source/Videos/%(title)S.%(ext)s"
+    end
+
+    test "renders the series_root marker with the given override", %{media_item: media_item} do
+      media_item =
+        update_media_profile_attribute(media_item, %{
+          output_path_template: "{{ source_custom_name }}{{ series_root }}/Videos/{{ title }}.%(ext)s"
+        })
+
+      path = DownloadOptionBuilder.build_output_path_for(media_item, %{"series_root" => "__marker__"})
+
+      assert path == "/tmp/test/media/my source__marker__/Videos/%(title)S.%(ext)s"
+    end
   end
 
   describe "build_quality_options_for/1" do

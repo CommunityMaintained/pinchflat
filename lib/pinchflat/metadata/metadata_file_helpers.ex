@@ -90,6 +90,17 @@ defmodule Pinchflat.Metadata.MetadataFileHelpers do
     end
   end
 
+  @series_root_marker "__series_root__"
+
+  @doc """
+  The sentinel that the `{{ series_root }}` output template variable is swapped
+  for when resolving a source's series directory. In normal renders the variable
+  expands to nothing, so filepaths are unaffected.
+
+  Returns binary()
+  """
+  def series_root_marker, do: @series_root_marker
+
   @doc """
   Attempts to determine the series directory from a media filepath.
   The series directory is the "root" directory for a given source
@@ -98,9 +109,43 @@ defmodule Pinchflat.Metadata.MetadataFileHelpers do
   Used for determining where to store things like NFO data and banners
   for media center apps. Not useful without a media center app.
 
+  If the filepath contains the series root marker (ie: the output template
+  used `{{ series_root }}`), the marked directory is used directly. Otherwise
+  falls back to looking for a season-style folder name.
+
   Returns {:ok, binary()} | {:error, :indeterminable}
   """
   def series_directory_from_media_filepath(media_filepath) do
+    case series_directory_from_marker(media_filepath) do
+      {:ok, series_directory} -> {:ok, series_directory}
+      {:error, :no_marker} -> series_directory_from_season_folder(media_filepath)
+    end
+  end
+
+  # The marker must land on a directory (not the filename) and the marked
+  # directory must be non-empty once the marker is stripped - both are also
+  # enforced by template validation, but data predating validation could
+  # slip through.
+  defp series_directory_from_marker(media_filepath) do
+    parts = Path.split(media_filepath)
+    marker_index = Enum.find_index(parts, &String.contains?(&1, @series_root_marker))
+
+    if marker_index && marker_index < length(parts) - 1 do
+      series_parts =
+        parts
+        |> Enum.take(marker_index + 1)
+        |> Enum.map(&String.replace(&1, @series_root_marker, ""))
+
+      case List.last(series_parts) do
+        "" -> {:error, :no_marker}
+        _ -> {:ok, Path.join(series_parts)}
+      end
+    else
+      {:error, :no_marker}
+    end
+  end
+
+  defp series_directory_from_season_folder(media_filepath) do
     # Matches "s" or "season" (case-insensitive)
     # followed by an optional non-word character (. or _ or <space>, etc)
     # followed by at least one digit

@@ -134,7 +134,12 @@ defmodule Pinchflat.Metadata.SourceMetadataStorageWorker do
   defp maybe_ignore_unavailable_source_metadata(_source, result), do: result
 
   defp determine_series_directory(source) do
-    output_path = DownloadOptionBuilder.build_output_path_for(source)
+    # Rendering with the sentinel (instead of the usual empty expansion) means a
+    # `{{ series_root }}` marker in the template survives into the resolved sample
+    # filepath, where `series_directory_from_media_filepath/1` can find it. This is
+    # a simulated yt-dlp call, so the sentinel never reaches the filesystem.
+    marker_override = %{"series_root" => MetadataFileHelpers.series_root_marker()}
+    output_path = DownloadOptionBuilder.build_output_path_for(source, marker_override)
     runner_opts = [output: output_path]
     addl_opts = [use_cookies: Sources.use_cookies?(source, :metadata)]
     details_result = MediaCollection.get_source_details(source.original_url, runner_opts, addl_opts)

@@ -22,6 +22,20 @@ defmodule Pinchflat.Downloading.OutputPathBuilderTest do
       assert res == "/videos/test.%(ext)S"
     end
 
+    test "it expands the series_root marker to nothing by default" do
+      assert {:ok, res} = OutputPathBuilder.build("/{{ channel }}{{ series_root }}/Videos/{{ title }}.{{ ext }}")
+
+      assert res == "/%(channel)S/Videos/%(title)S.%(ext)S"
+    end
+
+    test "it allows the series_root marker to be overridden" do
+      additional_options = %{"series_root" => "__marker__"}
+
+      assert {:ok, res} = OutputPathBuilder.build("/foo{{ series_root }}/{{ title }}.{{ ext }}", additional_options)
+
+      assert res == "/foo__marker__/%(title)S.%(ext)S"
+    end
+
     test "it leaves yt-dlp variables alone" do
       assert {:ok, res} = OutputPathBuilder.build("/videos/%(title)s.%(ext)s")
 

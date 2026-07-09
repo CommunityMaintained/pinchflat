@@ -406,6 +406,34 @@ defmodule Pinchflat.Metadata.SourceMetadataStorageWorkerTest do
       assert source.series_directory
     end
 
+    test "sets the series directory from a {{ series_root }} marker in the output template" do
+      media_profile =
+        media_profile_fixture(%{
+          output_path_template: "/{{ source_custom_name }}{{ series_root }}/Videos/{{ title }}.{{ ext }}"
+        })
+
+      stub(YtDlpRunnerMock, :run, fn
+        _url, :get_source_details, opts, _ot, _addl ->
+          # The output template handed to yt-dlp should carry the sentinel;
+          # emulate yt-dlp resolving the remaining variables into a filename
+          output = Keyword.fetch!(opts, :output)
+          assert String.contains?(output, MetadataFileHelpers.series_root_marker())
+          filename = output |> String.replace("%(title)S", "some title") |> String.replace("%(ext)S", "mp4")
+
+          {:ok, source_details_return_fixture(%{filename: filename})}
+
+        _url, :get_source_metadata, _opts, _ot, _addl ->
+          {:ok, "{}"}
+      end)
+
+      source = source_fixture(%{media_profile_id: media_profile.id, series_directory: nil})
+      perform_job(SourceMetadataStorageWorker, %{id: source.id})
+      source = Repo.reload(source)
+
+      expected_directory = Path.join(Application.get_env(:pinchflat, :media_directory), source.custom_name)
+      assert source.series_directory == expected_directory
+    end
+
     test "does not set the series directory if it cannot be determined" do
       stub(YtDlpRunnerMock, :run, fn
         _url, :get_source_details, _opts, _ot, _addl ->
