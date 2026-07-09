@@ -182,5 +182,36 @@ defmodule Pinchflat.ProfilesTest do
         refute cs.valid?
       end
     end
+
+    test "it allows a well-placed {{ series_root }} marker" do
+      valid_templates = [
+        "/{{ source_custom_name }}{{ series_root }}/Videos/{{ title }}.{{ ext }}",
+        "/{{ source_custom_name }}{{series_root}}/{{ title }}.{{ ext }}",
+        "/media/{{ source_custom_name }} {{ series_root }}/shorts/{{ title }}.{{ ext }}"
+      ]
+
+      for template <- valid_templates do
+        cs = Profiles.change_media_profile(%MediaProfile{}, %{name: "a", output_path_template: template})
+
+        assert cs.valid?
+      end
+    end
+
+    test "it does not allow misplaced {{ series_root }} markers" do
+      invalid_templates = [
+        # More than one marker
+        "/a{{ series_root }}/b{{ series_root }}/{{ title }}.{{ ext }}",
+        # Attached to the filename
+        "/videos/{{ series_root }}{{ title }}.{{ ext }}",
+        # On its own, not attached to a directory name
+        "/videos/{{ series_root }}/{{ title }}.{{ ext }}"
+      ]
+
+      for template <- invalid_templates do
+        cs = Profiles.change_media_profile(%MediaProfile{}, %{name: "a", output_path_template: template})
+
+        refute cs.valid?
+      end
+    end
   end
 end

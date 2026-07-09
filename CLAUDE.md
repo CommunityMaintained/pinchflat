@@ -103,7 +103,7 @@ Key workers:
 
 ### Other domain areas
 
-- `lib/pinchflat/metadata/` — parses and persists yt-dlp metadata: source/media metadata, NFO files (for Jellyfin/Kodi), source images.
+- `lib/pinchflat/metadata/` — parses and persists yt-dlp metadata: source/media metadata, NFO files (for Jellyfin/Kodi), source images. Source-level NFOs/artwork are written to the source's "series directory", resolved by `SourceMetadataStorageWorker` from a simulated yt-dlp render of the output template: a `{{ series_root }}` marker in the template (expands to nothing in real renders; swapped for a sentinel during resolution) explicitly names the root directory, with a fallback that detects a season-style folder (`Season 1`, `s2024`, …) and uses its parent. The marker supports YouTube-style (`/Channel/Videos/…`) and flat layouts the season heuristic can't handle (issue #141); placement rules (one marker, attached to a directory name, not the filename) are enforced by `MediaProfile.validate_series_root_marker/2`, shared with `Source` for template overrides.
 - `lib/pinchflat/podcasts/` — builds podcast RSS and OPML feeds so Sources can be consumed by podcast apps.
 - `lib/pinchflat/lifecycle/` — side effects around media lifecycle: Apprise `notifications` and user-defined `user_scripts` run via command runners.
 - `lib/pinchflat/http/` — small HTTP client behaviour (`http_behaviour.ex` / `http_client.ex`) for RSS fetches and similar, mockable in tests.

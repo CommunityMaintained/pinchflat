@@ -167,6 +167,41 @@ defmodule Pinchflat.Metadata.MetadataFileHelpersTest do
       end
     end
 
+    test "uses the series root marker when present" do
+      marker = Helpers.series_root_marker()
+      filepath = "/media/Cool Channel#{marker}/Videos/episode.mp4"
+
+      assert {:ok, "/media/Cool Channel"} = Helpers.series_directory_from_media_filepath(filepath)
+    end
+
+    test "strips the marker from the middle of a directory name" do
+      marker = Helpers.series_root_marker()
+      filepath = "/media/Cool#{marker} Channel/episode.mp4"
+
+      assert {:ok, "/media/Cool Channel"} = Helpers.series_directory_from_media_filepath(filepath)
+    end
+
+    test "the marker takes precedence over season-style folders" do
+      marker = Helpers.series_root_marker()
+      filepath = "/media/Cool Channel#{marker}/Season 1/episode.mp4"
+
+      assert {:ok, "/media/Cool Channel"} = Helpers.series_directory_from_media_filepath(filepath)
+    end
+
+    test "ignores a marker on the filename itself" do
+      marker = Helpers.series_root_marker()
+      filepath = "/media/Season 1/episode#{marker}.mp4"
+
+      assert {:ok, "/media"} = Helpers.series_directory_from_media_filepath(filepath)
+    end
+
+    test "ignores a marker whose directory is empty once stripped" do
+      marker = Helpers.series_root_marker()
+      filepath = "/media/#{marker}/episode.mp4"
+
+      assert {:error, :indeterminable} = Helpers.series_directory_from_media_filepath(filepath)
+    end
+
     test "returns an error if the season filepath can't be determined" do
       bad_filepaths = [
         "/media/1/episode.mp4",

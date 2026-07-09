@@ -58,6 +58,24 @@ defmodule Pinchflat.SourcesTest do
 
       assert Sources.output_path_template(source) == "/profile/{{ title }}.{{ ext }}"
     end
+
+    test "allows a well-placed {{ series_root }} marker in the override" do
+      source = source_fixture()
+      override = "/{{ source_custom_name }}{{ series_root }}/Videos/{{ title }}.{{ ext }}"
+
+      assert {:ok, source} = Sources.update_source(source, %{output_path_template_override: override})
+      assert source.output_path_template_override == override
+    end
+
+    test "does not allow a misplaced {{ series_root }} marker in the override" do
+      source = source_fixture()
+      override = "/videos/{{ series_root }}/{{ title }}.{{ ext }}"
+
+      assert {:error, %Ecto.Changeset{} = changeset} =
+               Sources.update_source(source, %{output_path_template_override: override})
+
+      assert errors_on(changeset).output_path_template_override
+    end
   end
 
   describe "use_cookies?/2" do

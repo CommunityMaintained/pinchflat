@@ -79,4 +79,51 @@
       </li>
     </ul>
   </section>
+
+  <h2 class="text-xl font-bold mb-2">NFO and Artwork Placement</h2>
+  <section class="ml-2 md:ml-4 mb-4 max-w-prose overflow-auto">
+    <p class="my-2">
+      When "Create NFO data" or "Download Series Images" is enabled, Pinchflat needs to know each source's
+      root folder so it can place <code class="text-sm">tvshow.nfo</code>
+      and artwork (poster, fanart, banner) there. By default it finds this folder by looking for a
+      season-style folder in your template (eg:
+      <.inline_code>Season 1</.inline_code>
+      or <.inline_code>s2024</.inline_code>) and using its parent.
+    </p>
+    <p class="my-2">
+      If your template doesn't use season folders - like YouTube-style
+      <.inline_code>Videos</.inline_code>
+      /
+      <.inline_code>Shorts</.inline_code>
+      folders or a flat layout - attach
+      <.inline_code>{double_brace("series_root")}</.inline_code>
+      to the folder that should act as the root instead:
+    </p>
+    <ul class="list-disc list-inside ml-2 md:ml-5">
+      <li class="mt-1">
+        <.inline_code>
+          {"/#{double_brace("source_custom_name")}#{double_brace("series_root")}/Videos/#{double_brace("title")}.#{double_brace("ext")}"}
+        </.inline_code>
+        - artwork is stored in
+        <.inline_code>{"/#{double_brace("source_custom_name")}"}</.inline_code>
+      </li>
+      <li class="mt-1">
+        <.inline_code>
+          {"/#{double_brace("source_custom_name")}#{double_brace("series_root")}/#{double_brace("title")}.#{double_brace("ext")}"}
+        </.inline_code>
+        - flat layout; artwork is stored alongside the media files
+      </li>
+    </ul>
+    <p class="my-2">
+      The marker expands to nothing in the final path - it only tells Pinchflat where the root is.
+      It must be attached to a directory name (not the filename or on its own) and can only appear once.
+    </p>
+    <p class="my-2">
+      <strong>NOTE:</strong>
+      make sure the marked folder is unique per source (eg: it contains <.inline_code>{double_brace("source_custom_name")}</.inline_code>). If two sources resolve to the
+      same root folder, they will overwrite each other's NFO and artwork. Existing sources pick up
+      template changes the next time their metadata is refreshed (eg: when the source's URL is updated
+      or the source is re-created).
+    </p>
+  </section>
 </aside>

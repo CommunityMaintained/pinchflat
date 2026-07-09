@@ -64,7 +64,14 @@ defmodule PinchflatWeb.MediaProfiles.MediaProfileHTML do
       static_season__episode_by_index:
         "<code>Season 1/s01eXX</code> where <code>XX</code> is the video's position in the playlist. Only recommended for playlists (not channels) that don't change",
       static_season__episode_by_date:
-        "<code>Season 1/s01eYYMMDD</code>. Recommended for playlists that might change or where order isn't important"
+        "<code>Season 1/s01eYYMMDD</code>. Recommended for playlists that might change or where order isn't important",
+      series_root:
+        "marks the folder it's attached to as the source's root folder for NFOs and artwork (poster, fanart, banner). " <>
+          "Use this when your template doesn't use Season folders - for example " <>
+          "<code>/{{ source_custom_name }}{{ series_root }}/Videos/{{ title }}.{{ ext }}</code> stores artwork in " <>
+          "<code>/{{ source_custom_name }}</code>. It must be attached to a directory name and expands to nothing " <>
+          "in the final path. Make sure the marked folder is unique per source (eg: contains " <>
+          "<code>{{ source_custom_name }}</code>), otherwise sources will overwrite each other's artwork"
     ]
   end
 
