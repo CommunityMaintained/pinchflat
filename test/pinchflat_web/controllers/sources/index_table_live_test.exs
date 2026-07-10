@@ -110,6 +110,66 @@ defmodule PinchflatWeb.Sources.SourceLive.IndexTableLiveTest do
     end
   end
 
+  describe "when sorting by the other columns" do
+    test "sorts by pending count", %{conn: conn} do
+      source1 = source_fixture(custom_name: "Has_Pending")
+      source2 = source_fixture(custom_name: "No_Pending")
+      media_item_fixture(%{source_id: source1.id, media_filepath: nil})
+
+      {:ok, view, _html} = live_isolated(conn, IndexTableLive, session: create_session())
+
+      click_element(view, "th", "Pending")
+
+      assert render_element(view, "tbody tr:first-child") =~ source2.custom_name
+      assert render_element(view, "tbody tr:last-child") =~ source1.custom_name
+    end
+
+    test "sorts by downloaded count", %{conn: conn} do
+      source1 = source_fixture(custom_name: "Has_Downloads")
+      source2 = source_fixture(custom_name: "No_Downloads")
+      media_item_fixture(%{source_id: source1.id})
+
+      {:ok, view, _html} = live_isolated(conn, IndexTableLive, session: create_session())
+
+      click_element(view, "th", "Downloaded")
+
+      assert render_element(view, "tbody tr:first-child") =~ source2.custom_name
+      assert render_element(view, "tbody tr:last-child") =~ source1.custom_name
+    end
+
+    test "sorts by media size", %{conn: conn} do
+      source1 = source_fixture(custom_name: "Big_Source")
+      source2 = source_fixture(custom_name: "Small_Source")
+      media_item_fixture(%{source_id: source1.id, media_size_bytes: 2_000})
+      media_item_fixture(%{source_id: source2.id, media_size_bytes: 1_000})
+
+      {:ok, view, _html} = live_isolated(conn, IndexTableLive, session: create_session())
+
+      # media_item_fixture creates stray zero-size sources, so only the biggest
+      # source has a deterministic position: last when ascending, first when
+      # descending
+      click_element(view, "th", "Size")
+      assert render_element(view, "tbody tr:last-child") =~ source1.custom_name
+
+      click_element(view, "th", "Size")
+      assert render_element(view, "tbody tr:first-child") =~ source1.custom_name
+    end
+
+    test "sorts by media profile name without case sensitivity", %{conn: conn} do
+      profile1 = media_profile_fixture(name: "zebra profile")
+      profile2 = media_profile_fixture(name: "Apple Profile")
+      source1 = source_fixture(custom_name: "Source_Z", media_profile_id: profile1.id)
+      source2 = source_fixture(custom_name: "Source_A", media_profile_id: profile2.id)
+
+      {:ok, view, _html} = live_isolated(conn, IndexTableLive, session: create_session())
+
+      click_element(view, "th", "Media Profile")
+
+      assert render_element(view, "tbody tr:first-child") =~ source2.custom_name
+      assert render_element(view, "tbody tr:last-child") =~ source1.custom_name
+    end
+  end
+
   describe "when testing pagination" do
     test "moving to the next page loads new records", %{conn: conn} do
       source1 = source_fixture(custom_name: "Source_A")

@@ -20,6 +20,12 @@ defmodule Pinchflat.YtDlp.UnavailableMediaTest do
     end
   end
 
+  describe "error_strings/0" do
+    test "every entry is recognized by error?/1" do
+      assert Enum.all?(UnavailableMedia.error_strings(), &UnavailableMedia.error?/1)
+    end
+  end
+
   describe "matched_reason/1" do
     test "returns the matched substring" do
       assert UnavailableMedia.matched_reason("ERROR: [youtube] abc: Video unavailable") == "Video unavailable"

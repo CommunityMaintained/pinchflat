@@ -133,6 +133,8 @@ Standard Phoenix with LiveView. Routes are defined in `lib/pinchflat_web/router.
 - Podcast RSS/OPML endpoints bypass basic auth intentionally (to work with podcast apps)
 - `/healthcheck` bypasses auth and CSRF
 - `strip_trailing_extension` plug in `endpoint.ex` allows media streaming URLs with extensions
+- 404/500 error pages render through a dedicated standalone layout (`components/layouts/error.html.heex`, set as `render_errors` `root_layout`) — deliberately free of flash, LiveView, and `Settings.get!` DB calls so error rendering can't crash again mid-render (the app/root layouts require assigns and DB access the error conn doesn't have)
+- `Plug.Static` in `endpoint.ex` pairs `only:` with `only_matching: ~w(favicon apple-touch-icon)` because `~p` emits digested filenames in prod that a literal `only:` match would reject (sending every browser icon request through the router as a 404)
 
 ### Configuration injection pattern
 
