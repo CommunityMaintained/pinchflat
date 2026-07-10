@@ -71,6 +71,21 @@ defmodule PinchflatWeb.Pages.JobTableLiveTest do
       assert html =~ ~p"/sources/#{source.id}"
     end
 
+    test "shows a friendly name for the other worker types", %{conn: conn} do
+      source = source_fixture()
+      {:ok, indexing_task} = Pinchflat.SlowIndexing.MediaCollectionIndexingWorker.kickoff_with_task(source)
+      {:ok, metadata_task} = Pinchflat.Metadata.SourceMetadataStorageWorker.kickoff_with_task(source)
+
+      Oban.Job
+      |> where([j], j.id in ^[indexing_task.job_id, metadata_task.job_id])
+      |> Repo.update_all(set: [state: "executing"])
+
+      {:ok, _view, html} = live_isolated(conn, JobTableLive, session: %{})
+
+      assert html =~ "Indexing Source"
+      assert html =~ "Fetching Source Metadata"
+    end
+
     test "reloads the table on job:state change events", %{conn: conn} do
       {_source, _media_item, _task, _job} = create_media_item_job()
       {:ok, view, _html} = live_isolated(conn, JobTableLive, session: %{})

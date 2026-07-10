@@ -70,6 +70,42 @@ defmodule PinchflatWeb.Settings.CookieFileLiveTest do
 
       assert html =~ "hero-x-mark"
     end
+
+    test "reports when every cookie is expired", %{conn: conn} do
+      File.write!(CookieFile.filepath(), ".youtube.com\tTRUE\t/\tTRUE\t1000\tNAME\tvalue")
+      {:ok, view, _html} = live_isolated(conn, CookieFileLive)
+
+      html = view |> element("[phx-click=validate_cookies]") |> render_click()
+
+      assert html =~ "hero-x-mark"
+      assert html =~ "expired"
+    end
+
+    test "reports a mix of active and expired cookies", %{conn: conn} do
+      lines = [
+        ".youtube.com\tTRUE\t/\tTRUE\t9999999999\tACTIVE\tvalue",
+        ".youtube.com\tTRUE\t/\tTRUE\t1000\tEXPIRED\tvalue"
+      ]
+
+      File.write!(CookieFile.filepath(), Enum.join(lines, "\n"))
+      {:ok, view, _html} = live_isolated(conn, CookieFileLive)
+
+      html = view |> element("[phx-click=validate_cookies]") |> render_click()
+
+      assert html =~ "hero-exclamation-triangle"
+      assert html =~ "1 of 2 active, 1 expired"
+    end
+
+    test "resets the validate icon after a delay", %{conn: conn} do
+      File.write!(CookieFile.filepath(), ".youtube.com\tTRUE\t/\tTRUE\t9999999999\tNAME\tvalue")
+      {:ok, view, _html} = live_isolated(conn, CookieFileLive)
+
+      assert view |> element("[phx-click=validate_cookies]") |> render_click() =~ "hero-check"
+
+      send(view.pid, :reset_validate_icon)
+
+      assert render(view) =~ "hero-check-badge"
+    end
   end
 
   describe "uploading cookies" do
