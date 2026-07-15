@@ -41,7 +41,7 @@
     {
       "customType": "regex",
       "description": "Debian snapshot in ci-base image tag — resolved against real hexpm/elixir tags, stays on trixie-slim",
-      "managerFilePatterns": ["/(^|/)ci-base\\.Dockerfile$/"],
+      "managerFilePatterns": ["/(^|/)ci-base\\.Dockerfile$/", "/(^|/)selfhosted\\.Dockerfile$/"],
       "matchStrings": ["ARG DEBIAN_VERSION=(?<currentValue>\\S+)"],
       "depNameTemplate": "debian",
       "packageNameTemplate": "hexpm/elixir",
