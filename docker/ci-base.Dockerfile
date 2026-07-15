@@ -23,7 +23,7 @@
 # never proposes a value from a combo that isn't published. Debian stays on trixie-slim.
 ARG ELIXIR_VERSION=1.20.2
 ARG OTP_VERSION=28.5.0.3
-ARG DEBIAN_VERSION=trixie-20260623-slim
+ARG DEBIAN_VERSION=trixie-20260713-slim
 # renovate: datasource=github-releases depName=denoland/deno
 ARG DENO_VERSION=v2.9.0
 # renovate: datasource=node-version depName=node

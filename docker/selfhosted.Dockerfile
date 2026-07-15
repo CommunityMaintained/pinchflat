@@ -1,7 +1,7 @@
 # Builder stage runs on the shared ci-base image — it already provides Elixir, OTP,
 # build-essential, git, curl, node+yarn, hex, rebar, and the pinned ffmpeg binary.
 # Runner stage stays on debian:trixie-slim to keep the production image small.
-ARG DEBIAN_VERSION=trixie-20260610-slim
+ARG DEBIAN_VERSION=trixie-20260713-slim
 ARG CI_BASE_IMAGE="ghcr.io/communitymaintained/pinchflat-ci-base:latest"
 ARG RUNNER_IMAGE="debian:${DEBIAN_VERSION}"
 
