@@ -47,6 +47,7 @@
     - [Reverse Proxies](#reverse-proxies)
       - [Caddy Proxy Example](#caddy-proxy-example)
   - [Migrating from kieraneglin/pinchflat](#migrating-from-kieraneglinpinchflat)
+    - [Returning to kieraneglin/pinchflat](#returning-to-kieraneglinpinchflat)
   - [Stability disclaimer](#stability-disclaimer)
   - [Legal Use \& Disclaimer](#legal-use--disclaimer)
   - [License](#license)
@@ -216,6 +217,18 @@ ghcr.io/kieraneglin/pinchflat:latest  →  ghcr.io/communitymaintained/pinchflat
 Also available on Docker Hub as `communitymaintained/pinchflat:latest`.
 
 Stop the old container, update the image reference, and start it again. Your `/config` and `/downloads` volumes carry over unchanged.
+
+### Returning to kieraneglin/pinchflat
+
+You can switch back to upstream (Kieran's image) at any time by simply pointing the image to `ghcr.io/kieraneglin/pinchflat:latest`. If you wish to make a 100% clean return, run the one-off command below **first**. It removes all traces of this for from the Pinchflat's database.
+
+```bash
+docker compose run --rm pinchflat bin/pinchflat eval "Pinchflat.Release.prep_for_upstream()"
+```
+
+The command drops the fork-only DB columns, removes their migration records so the ledger matches upstream too, and exits. Next, just switch the image reference to upstream next and start the container. If you start this fork again instead, it re-adds its columns automatically and keeps working (it self-heals rather than breaking).
+
+> This step is **optional** — return works without it. It exists only for users who want an identical schema. The dropped columns (e.g. the yt-dlp update policy and unavailable-media status) are removed along with their data.
 
 ---
 
