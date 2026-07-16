@@ -1,8 +1,17 @@
-> [!TIP]
+> [!IMPORTANT]
+> Pinchflat vs. Tubeless.
+>
+> Review the options below and carefully chose your own adventure.
+>
 > This is a community-maintained fork of [kieraneglin/pinchflat](https://github.com/kieraneglin/pinchflat). The original project is not actively maintained; this fork exists to continue development and apply community contributions. See [Migrating from kieraneglin/pinchflat](#migrating-from-kieraneglinpinchflat). PRs welcome — see [CONTRIBUTING.md](CONTRIBUTING.md). Discord Server [created](https://discord.gg/7jdBJGCrq)!
 
-> [!IMPORTANT]
-> **Volunteers needed:** I started this GitHub org with the intent of providing life support to valuable but unmaintained open-source projects, hoping we could build a small community around it. Pinchflat is Elixir/Phoenix, so that's directly useful here, but the org's needs go beyond any one stack — Docker/GHCR image publishing, GitHub Actions/CI maintenance, release management, issue triage, and documentation all help regardless of what project we take on next. If you're interested in joining or bringing another project in, let me know what you'd like to work on and any relevant experience you have.
+<p align="center">
+  <img
+    src="priv/static/images/pinchflat-vs-tubeless.png"
+    alt="Pinchflat Logo by @hernandito"
+    width="700"
+  />
+</p>
 
 <p align="center">
   <img
