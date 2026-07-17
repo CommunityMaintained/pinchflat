@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.4.1](https://github.com/CommunityMaintained/pinchflat/compare/v1.4.0...v1.4.1) (2026-07-17)
+
+
+### Features
+
+* add command to revert to an upstream-compatible schema ([054be02](https://github.com/CommunityMaintained/pinchflat/commit/054be02764a8c2dda3ad33eab9808dfe0e22a26f))
+
+
+### Chores
+
+* **deps:** pin ci build sha-009cccb ([b830d69](https://github.com/CommunityMaintained/pinchflat/commit/b830d69025605f8856308f143bab136c8fa0a195))
+* **deps:** tighten ecto_sqlite3 and prom_ex constraints and bump locked deps ([768b120](https://github.com/CommunityMaintained/pinchflat/commit/768b12051b0578d92e06d36e464af0779e60e842))
+* **deps:** update debian docker tag to trixie-20260713-slim ([36cc572](https://github.com/CommunityMaintained/pinchflat/commit/36cc572a7ba378476f40ca489c9841f47b394a94))
+* **deps:** update dependency prettier to v3.9.5 ([a6359e0](https://github.com/CommunityMaintained/pinchflat/commit/a6359e07f4d33fc5be75861e39d4546eee4744b2))
+
+
+### Documentation
+
+* add Discord link, legal use disclaimer, and responsible use guidelines ([b8e6b28](https://github.com/CommunityMaintained/pinchflat/commit/b8e6b28c036a6c5eb46a27ec409a34e875827670))
+* explain pinchflat vs tubeless in README.md ([9a33fda](https://github.com/CommunityMaintained/pinchflat/commit/9a33fdab09888cc27790ba12b82d2d73b9802292))
+
 ## [1.4.0](https://github.com/CommunityMaintained/pinchflat/compare/v1.3.1...v1.4.0) (2026-07-10)
 
 
