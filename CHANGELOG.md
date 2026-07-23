@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.5.0](https://github.com/CommunityMaintained/pinchflat/compare/v1.4.1...v1.5.0) (2026-07-23)
+
+
+### Features
+
+* Add GitHub Releases to Discord workflow ([#173](https://github.com/CommunityMaintained/pinchflat/issues/173)) ([83f2b3a](https://github.com/CommunityMaintained/pinchflat/commit/83f2b3af1dc1858fa8d5bc014f383e8f77d83e18))
+
+
+### Chores
+
+* **ci:** lint GHA workflow ([121f6d6](https://github.com/CommunityMaintained/pinchflat/commit/121f6d6866fb42f58f3ffdca4a5b04d9957c68f1))
+
 ## [1.4.1](https://github.com/CommunityMaintained/pinchflat/compare/v1.4.0...v1.4.1) (2026-07-17)
 
 
